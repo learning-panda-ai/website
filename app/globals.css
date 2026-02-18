@@ -1,26 +1,277 @@
 @import "tailwindcss";
 
+/* ── 🐼 Learning Panda — Kid-Friendly Green & Bamboo Theme ── */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Greens from the panda logo */
+  --panda-green: #4CAF50;
+  --panda-green-light: #81C784;
+  --panda-green-dark: #388E3C;
+  --panda-green-50: #E8F5E9;
+  --panda-green-100: #C8E6C9;
+
+  /* Bamboo / nature accents */
+  --bamboo: #7CB342;
+  --bamboo-light: #AED581;
+  --bamboo-dark: #558B2F;
+
+  /* Warm cream/beige from logo background */
+  --cream: #FFF8E7;
+  --cream-light: #FFFDF5;
+  --cream-dark: #F5E6C8;
+
+  /* Golden yellow accent (lightbulb from logo) */
+  --golden: #FFB300;
+  --golden-light: #FFD54F;
+  --golden-dark: #FF8F00;
+
+  /* Neutrals */
+  --background: #FFFDF7;
+  --foreground: #2E3A2F;
+  --text-primary: #1B5E20;
+  --text-secondary: #4E6B4F;
+  --text-muted: #7A8F7B;
+
+  /* Fun accent colors */
+  --accent-blue: #42A5F5;
+  --accent-purple: #AB47BC;
+  --accent-orange: #FF7043;
+  --accent-pink: #EC407A;
+  --accent-teal: #26A69A;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
+  --color-panda-green: var(--panda-green);
+  --color-panda-green-light: var(--panda-green-light);
+  --color-panda-green-dark: var(--panda-green-dark);
+  --color-bamboo: var(--bamboo);
+  --color-bamboo-light: var(--bamboo-light);
+  --color-cream: var(--cream);
+  --color-cream-light: var(--cream-light);
+  --color-golden: var(--golden);
+  --color-golden-light: var(--golden-light);
+  --font-sans: var(--font-nunito);
+  --font-display: var(--font-fredoka);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* ── Reset & Base ─────────────────────────────────── */
+* {
+  box-sizing: border-box;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans), system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ── Animations ───────────────────────────────────── */
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes floatUp {
+  0% { transform: translateY(0) rotate(0deg); opacity: 0.7; }
+  50% { opacity: 1; }
+  100% { transform: translateY(-100vh) rotate(360deg); opacity: 0; }
+}
+
+@keyframes wobble {
+  0%, 100% { transform: rotate(-3deg); }
+  50% { transform: rotate(3deg); }
+}
+
+@keyframes bounce-gentle {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { opacity: 0.3; transform: scale(1); }
+  50% { opacity: 0.6; transform: scale(1.08); }
+}
+
+@keyframes twinkle {
+  0%, 100% { opacity: 0.2; transform: scale(0.8); }
+  50% { opacity: 1; transform: scale(1.2); }
+}
+
+@keyframes sway {
+  0%, 100% { transform: rotate(-5deg) translateX(0); }
+  25% { transform: rotate(3deg) translateX(5px); }
+  75% { transform: rotate(-3deg) translateX(-5px); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+/* ── Bamboo Forest Panel Background ───────────────── */
+.panda-forest-bg,
+.ai-pulse-bg {
+  background: linear-gradient(
+    160deg,
+    #0D3B12 0%,
+    #14532D 20%,
+    #166534 40%,
+    #15803D 60%,
+    #14532D 80%,
+    #0D3B12 100%
+  );
+  background-size: 300% 300%;
+  animation: gradientShift 10s ease infinite;
+}
+
+/* ── Glow orbs (nature-themed) ────────────────────── */
+.glow-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  animation: pulse-glow 5s ease-in-out infinite;
+}
+
+.glow-orb-1 {
+  width: 250px;
+  height: 250px;
+  background: rgba(34, 197, 94, 0.12);
+  top: 5%;
+  left: 10%;
+  animation-delay: 0s;
+}
+
+.glow-orb-2 {
+  width: 180px;
+  height: 180px;
+  background: rgba(250, 204, 21, 0.08);
+  bottom: 15%;
+  right: 5%;
+  animation-delay: 2s;
+}
+
+.glow-orb-3 {
+  width: 140px;
+  height: 140px;
+  background: rgba(74, 222, 128, 0.1);
+  top: 55%;
+  left: 45%;
+  animation-delay: 1s;
+}
+
+/* ── Progress bar shimmer ─────────────────────────── */
+.progress-shimmer {
+  background: linear-gradient(90deg, #4CAF50 0%, #81C784 40%, #FFD54F 60%, #4CAF50 100%);
+  background-size: 200% 100%;
+  animation: shimmer 2.5s ease-in-out infinite;
+}
+
+/* ── Focus ring utility ───────────────────────────── */
+.focus-ring-green {
+  @apply outline-none ring-2 ring-green-400/50 ring-offset-2;
+}
+
+/* ── Kid-friendly button styles ───────────────────── */
+.kids-btn {
+  @apply rounded-2xl font-bold tracking-wide transition-all;
+  font-family: var(--font-display), var(--font-sans), sans-serif;
+  box-shadow: 0 4px 0 rgba(0, 0, 0, 0.1);
+  position: relative;
+  top: 0;
+}
+.kids-btn:active {
+  top: 2px;
+  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.1);
+}
+
+.kids-submit-btn {
+  background: linear-gradient(135deg, #16a34a 0%, #22c55e 50%, #15803d 100%);
+  box-shadow: 0 5px 0 #14532d, 0 10px 30px rgba(22, 163, 74, 0.4);
+  position: relative;
+  top: 0;
+  letter-spacing: 0.02em;
+}
+.kids-submit-btn:hover {
+  background: linear-gradient(135deg, #22c55e 0%, #4ade80 50%, #16a34a 100%);
+  box-shadow: 0 5px 0 #14532d, 0 14px 40px rgba(22, 163, 74, 0.5);
+}
+.kids-submit-btn:active {
+  top: 3px;
+  box-shadow: 0 2px 0 #14532d, 0 4px 15px rgba(22, 163, 74, 0.3);
+}
+
+/* ── Playful input styling ────────────────────────── */
+.panda-input {
+  @apply w-full rounded-2xl border-2 border-green-300 bg-white py-3.5 text-sm text-green-900 transition-all;
+  font-family: var(--font-sans), sans-serif;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06), inset 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+.panda-input:focus {
+  @apply border-green-500 outline-none ring-4 ring-green-200;
+  box-shadow: 0 2px 12px rgba(76, 175, 80, 0.15), inset 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+.panda-input::placeholder {
+  color: #9CA3AF;
+}
+
+/* ── Scrollbar styling (nature-themed) ────────────── */
+.custom-scrollbar::-webkit-scrollbar {
+  height: 8px;
+  width: 8px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #E8F5E9;
+  border-radius: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #A5D6A7;
+  border-radius: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #81C784;
+}
+
+/* ── Bamboo dots pattern ──────────────────────────── */
+.bamboo-dots {
+  background-image: radial-gradient(circle, rgba(76, 175, 80, 0.08) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+/* ── Fun selection card ───────────────────────────── */
+.selection-card {
+  @apply rounded-2xl border-2 p-4 transition-all cursor-pointer;
+  border-color: #C8E6C9;
+  background: white;
+}
+.selection-card:hover {
+  border-color: #81C784;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(76, 175, 80, 0.12);
+}
+.selection-card.selected {
+  border-color: #4CAF50;
+  background: linear-gradient(135deg, #E8F5E9 0%, #F1F8E9 100%);
+  box-shadow: 0 8px 30px rgba(76, 175, 80, 0.2);
+}
+
+/* ── Panda mascot animations ──────────────────────── */
+.panda-bounce {
+  animation: bounce-gentle 3s ease-in-out infinite;
+}
+
+.panda-wobble {
+  animation: wobble 4s ease-in-out infinite;
+}
+
+.twinkle {
+  animation: twinkle 2s ease-in-out infinite;
+}
+
+.sway {
+  animation: sway 6s ease-in-out infinite;
 }
