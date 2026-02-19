@@ -77,14 +77,7 @@ const ALL_GRADES = [
 // ── Shared UI primitives ───────────────────────────────────────────────────
 
 function FieldLabel({ children }: { children: React.ReactNode }) {
-  return (
-    <label
-      className="block text-xs font-bold text-green-700 mb-1"
-      style={{ fontFamily: "var(--font-fredoka)" }}
-    >
-      {children}
-    </label>
-  );
+  return <label className="panda-label">{children}</label>;
 }
 
 function TextInput({
@@ -107,7 +100,7 @@ function TextInput({
       onChange={(e) => onChange?.(e.target.value)}
       placeholder={placeholder}
       disabled={disabled}
-      className="panda-input w-full disabled:bg-gray-50 disabled:text-gray-400 disabled:cursor-not-allowed"
+      className="panda-input"
     />
   );
 }
@@ -228,17 +221,9 @@ function GeneralTab({ user }: { user: UserProp }) {
       <SectionCard>
         <SectionTitle>Profile</SectionTitle>
         <div className="flex items-center gap-5">
-          {user.image ? (
-            <img
-              src={user.image}
-              alt={displayName}
-              className="h-20 w-20 rounded-2xl border-2 border-green-200 object-cover"
-            />
-          ) : (
-            <div className="h-20 w-20 rounded-2xl bg-green-100 border-2 border-green-200 flex items-center justify-center text-3xl font-bold text-green-700">
-              {displayName[0]}
-            </div>
-          )}
+          <div className="h-20 w-20 rounded-2xl bg-green-100 border-2 border-green-200 flex items-center justify-center text-3xl font-bold text-green-700">
+            {displayName[0]}
+          </div>
           <div>
             <p className="font-bold text-gray-800">{displayName}</p>
             <p className="text-sm text-gray-400">{user.email}</p>
@@ -278,7 +263,7 @@ function GeneralTab({ user }: { user: UserProp }) {
             <select
               value={form.grade}
               onChange={(e) => set("grade")(e.target.value)}
-              className="panda-input w-full"
+              className="panda-select"
             >
               <option value="">Select grade</option>
               {ALL_GRADES.map((g) => (
@@ -714,17 +699,9 @@ export default function SettingsClient({ user }: { user: UserProp }) {
               <Bell className="h-4 w-4 text-gray-500" />
             </button>
             <div className="flex items-center gap-2 pl-2 border-l border-gray-100">
-              {user.image ? (
-                <img
-                  src={user.image}
-                  alt={displayName}
-                  className="h-8 w-8 rounded-full border-2 border-green-200"
-                />
-              ) : (
-                <div className="h-8 w-8 rounded-full bg-green-100 border-2 border-green-200 flex items-center justify-center text-sm font-bold text-green-700">
-                  {displayName[0]}
-                </div>
-              )}
+              <div className="h-8 w-8 rounded-full bg-green-100 border-2 border-green-200 flex items-center justify-center text-sm font-bold text-green-700">
+                {displayName[0]}
+              </div>
               <span className="text-sm font-semibold text-gray-700 hidden sm:block">
                 {displayName}
               </span>
@@ -748,17 +725,9 @@ export default function SettingsClient({ user }: { user: UserProp }) {
             <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
               {/* User card */}
               <div className="flex flex-col items-center py-6 px-4 bg-gradient-to-b from-green-50 to-white border-b border-gray-100">
-                {user.image ? (
-                  <img
-                    src={user.image}
-                    alt={displayName}
-                    className="h-16 w-16 rounded-2xl border-2 border-green-200 object-cover mb-3"
-                  />
-                ) : (
-                  <div className="h-16 w-16 rounded-2xl bg-green-100 border-2 border-green-200 flex items-center justify-center text-2xl font-bold text-green-700 mb-3">
-                    {displayName[0]}
-                  </div>
-                )}
+                <div className="h-16 w-16 rounded-2xl bg-green-100 border-2 border-green-200 flex items-center justify-center text-2xl font-bold text-green-700 mb-3">
+                  {displayName[0]}
+                </div>
                 <p
                   className="font-extrabold text-gray-800 text-sm text-center"
                   style={{ fontFamily: "var(--font-fredoka)" }}
