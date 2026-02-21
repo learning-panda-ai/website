@@ -59,22 +59,30 @@ export function MobileTabBar({
   setActiveTab,
 }: Omit<NavProps, "enrolledCourses">) {
   return (
-    <div className="lg:hidden flex gap-2 overflow-x-auto pb-2 mb-6 -mx-1 px-1">
-      {MOBILE_TABS.map(({ id, label, emoji }) => (
-        <button
-          key={id}
-          onClick={() => setActiveTab(id)}
-          className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-bold whitespace-nowrap transition-all flex-shrink-0 ${
-            activeTab === id
-              ? "bg-green-600 text-white shadow-md"
-              : "bg-white border border-gray-200 text-gray-500 hover:border-green-200"
-          }`}
-          style={{ fontFamily: "var(--font-fredoka)" }}
-        >
-          <span>{emoji}</span>
-          {label}
-        </button>
-      ))}
-    </div>
+    <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-gray-100 shadow-[0_-4px_16px_rgba(0,0,0,0.06)]">
+      <div className="flex">
+        {MOBILE_TABS.map(({ id, label, emoji }) => {
+          const isActive = activeTab === id;
+          return (
+            <button
+              key={id}
+              onClick={() => setActiveTab(id)}
+              className={`relative flex-1 flex flex-col items-center gap-1 pt-3 pb-5 transition-colors ${
+                isActive ? "text-green-600" : "text-gray-400"
+              }`}
+              style={{ fontFamily: "var(--font-fredoka)" }}
+            >
+              {isActive && (
+                <span className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-0.5 bg-green-500 rounded-full" />
+              )}
+              <span className="text-xl leading-none">{emoji}</span>
+              <span className={`text-[10px] font-bold leading-none ${isActive ? "text-green-600" : "text-gray-400"}`}>
+                {label}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+    </nav>
   );
 }

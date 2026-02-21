@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { Session } from "next-auth";
-import { Star } from "lucide-react";
+import { Star, Pencil } from "lucide-react";
 
 interface DashboardHeaderProps {
   user: Session["user"];
@@ -39,23 +39,21 @@ export default function DashboardHeader({ user, enrolledCourses }: DashboardHead
 
       {/* Profile header */}
       <div className="bg-gray-50 border-b border-gray-100">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 flex items-center justify-between gap-4 flex-wrap">
-          <div className="flex items-center gap-4">
-            <div className="h-14 w-14 rounded-2xl bg-green-100 border-2 border-green-200 flex items-center justify-center text-2xl font-bold text-green-700 flex-shrink-0">
-              {firstName[0]}
-            </div>
-            <div>
-              <p
-                className="font-extrabold text-gray-800 text-base leading-tight"
-                style={{ fontFamily: "var(--font-fredoka)" }}
-              >
-                {user?.name}
-              </p>
-              <p className="text-sm text-gray-400 mt-0.5">{user?.email}</p>
-            </div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-5 flex items-center gap-3 sm:gap-4">
+          <div className="h-12 w-12 sm:h-14 sm:w-14 rounded-2xl bg-green-100 border-2 border-green-200 flex items-center justify-center text-xl sm:text-2xl font-bold text-green-700 flex-shrink-0">
+            {firstName[0]}
+          </div>
+          <div className="flex-1 min-w-0">
+            <p
+              className="font-extrabold text-gray-800 text-sm sm:text-base leading-tight truncate"
+              style={{ fontFamily: "var(--font-fredoka)" }}
+            >
+              {user?.name}
+            </p>
+            <p className="text-xs sm:text-sm text-gray-400 mt-0.5 truncate">{user?.email}</p>
           </div>
 
-          <div className="flex items-center gap-3 flex-wrap">
+          <div className="flex items-center gap-2 flex-shrink-0">
             <div className="hidden sm:flex items-center gap-2">
               {enrolledCourses.length > 0 && (
                 <span className="text-xs font-bold bg-green-100 text-green-700 border border-green-200 px-3 py-1 rounded-full">
@@ -71,10 +69,11 @@ export default function DashboardHeader({ user, enrolledCourses }: DashboardHead
             </div>
             <Link
               href="/settings"
-              className="text-sm font-bold text-gray-600 border border-gray-200 hover:border-green-400 hover:text-green-700 bg-white px-4 py-2 rounded-xl transition-all"
+              className="flex items-center gap-1.5 text-sm font-bold text-gray-600 border border-gray-200 hover:border-green-400 hover:text-green-700 bg-white px-3 sm:px-4 py-2 rounded-xl transition-all"
               style={{ fontFamily: "var(--font-fredoka)" }}
             >
-              Edit Profile
+              <Pencil className="h-3.5 w-3.5" />
+              <span className="hidden sm:block">Edit Profile</span>
             </Link>
           </div>
         </div>

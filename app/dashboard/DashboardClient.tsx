@@ -27,7 +27,7 @@ export default function DashboardClient({ session, enrolledCourses }: DashboardC
 
       <DashboardHeader user={user} enrolledCourses={enrolledCourses} />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 pb-24 lg:py-8 lg:pb-8">
         <div className="flex gap-8 items-start">
           <DesktopSidebar
             activeTab={activeTab}

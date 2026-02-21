@@ -20,25 +20,27 @@ export default function ProfileTab({ user, enrolledCourses }: ProfileTabProps) {
         Profile
       </h2>
 
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 flex items-center gap-5">
-        <div className="h-20 w-20 rounded-2xl bg-green-100 border-2 border-green-200 flex items-center justify-center text-3xl font-bold text-green-700 flex-shrink-0">
-          {firstName[0]}
+      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 sm:p-6">
+        <div className="flex items-center gap-4">
+          <div className="h-16 w-16 sm:h-20 sm:w-20 rounded-2xl bg-green-100 border-2 border-green-200 flex items-center justify-center text-2xl sm:text-3xl font-bold text-green-700 flex-shrink-0">
+            {firstName[0]}
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="font-extrabold text-gray-800 text-base sm:text-lg" style={{ fontFamily: "var(--font-fredoka)" }}>
+              {user?.name}
+            </p>
+            <p className="text-xs sm:text-sm text-gray-400 mt-0.5 truncate">{user?.email}</p>
+            <p className="text-xs text-gray-300 mt-1 hidden sm:block">Profile photo synced from Google</p>
+          </div>
+          <Link
+            href="/settings"
+            className="flex items-center gap-1.5 text-sm font-bold text-gray-600 border border-gray-200 hover:border-green-300 hover:text-green-700 px-3 sm:px-4 py-2 rounded-xl transition-all flex-shrink-0"
+            style={{ fontFamily: "var(--font-fredoka)" }}
+          >
+            <Pencil className="h-3.5 w-3.5" />
+            <span className="hidden sm:block">Edit Profile</span>
+          </Link>
         </div>
-        <div className="flex-1 min-w-0">
-          <p className="font-extrabold text-gray-800 text-lg" style={{ fontFamily: "var(--font-fredoka)" }}>
-            {user?.name}
-          </p>
-          <p className="text-sm text-gray-400 mt-0.5 truncate">{user?.email}</p>
-          <p className="text-xs text-gray-300 mt-1">Profile photo synced from Google</p>
-        </div>
-        <Link
-          href="/settings"
-          className="flex items-center gap-2 text-sm font-bold text-gray-600 border border-gray-200 hover:border-green-300 hover:text-green-700 px-4 py-2 rounded-xl transition-all flex-shrink-0"
-          style={{ fontFamily: "var(--font-fredoka)" }}
-        >
-          <Pencil className="h-3.5 w-3.5" />
-          Edit Profile
-        </Link>
       </div>
 
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">

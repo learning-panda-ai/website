@@ -18,7 +18,7 @@ export default function CoursesTab({ enrolledCourses }: CoursesTabProps) {
   return (
     <motion.div key="courses" {...tabAnim}>
       {/* Heading row */}
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex items-center justify-between mb-6 sm:mb-8">
         <h2
           className="text-2xl font-extrabold text-gray-800"
           style={{ fontFamily: "var(--font-fredoka)" }}
@@ -27,11 +27,12 @@ export default function CoursesTab({ enrolledCourses }: CoursesTabProps) {
         </h2>
         <Link
           href="/settings"
-          className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white text-sm font-bold px-4 py-2.5 rounded-xl transition-all shadow-sm hover:shadow-md"
+          className="flex items-center gap-1.5 bg-green-600 hover:bg-green-700 text-white text-sm font-bold px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl transition-all shadow-sm hover:shadow-md"
           style={{ fontFamily: "var(--font-fredoka)" }}
         >
           <Pencil className="h-3.5 w-3.5" />
-          Edit Courses
+          <span className="hidden sm:block">Edit Courses</span>
+          <span className="sm:hidden">Edit</span>
         </Link>
       </div>
 

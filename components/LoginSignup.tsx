@@ -155,7 +155,7 @@ export default function LoginSignup() {
         initial={{ opacity: 0, x: -40 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.7, ease: "easeOut" }}
-        className="panda-forest-bg relative isolate flex flex-col items-center justify-center overflow-hidden px-8 py-16 lg:w-1/2 lg:py-0"
+        className="panda-forest-bg relative isolate hidden lg:flex flex-col items-center justify-center overflow-hidden px-8 py-16 lg:w-1/2 lg:py-0"
       >
         <div className="glow-orb glow-orb-1" />
         <div className="glow-orb glow-orb-2" />
@@ -250,7 +250,7 @@ export default function LoginSignup() {
         initial={{ opacity: 0, x: 40 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.7, ease: "easeOut" }}
-        className="relative isolate flex flex-1 items-center justify-center bg-white px-6 py-12"
+        className="relative isolate flex flex-1 min-h-screen items-center justify-center bg-white px-6 py-12"
       >
         <div className="absolute inset-0 bamboo-dots opacity-40 pointer-events-none" />
 
@@ -366,19 +366,21 @@ export default function LoginSignup() {
                     <div className="h-px flex-1 bg-gray-100" />
                   </div>
 
-                  {/* Email OTP */}
-                  <motion.button
-                    type="button"
-                    whileHover={turnstileToken ? { scale: 1.02, y: -2 } : {}}
-                    whileTap={turnstileToken ? { scale: 0.98 } : {}}
-                    onClick={() => { setError(null); setStep("email-input"); }}
-                    disabled={!turnstileToken}
-                    className="flex w-full items-center justify-center gap-3 rounded-2xl border border-green-200 bg-green-50 px-4 py-3 text-base font-bold text-green-700 shadow-sm hover:bg-green-100 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-                    style={{ fontFamily: "var(--font-fredoka)" }}
-                  >
-                    <Mail className="h-5 w-5" />
-                    Sign in with Email
-                  </motion.button>
+                  {/* Email OTP — temporarily disabled */}
+                  <div className="relative">
+                    <motion.button
+                      type="button"
+                      disabled
+                      className="flex w-full items-center justify-center gap-3 rounded-2xl border border-green-100 bg-green-50/50 px-4 py-3 text-base font-bold text-green-400 shadow-sm opacity-50 cursor-not-allowed"
+                      style={{ fontFamily: "var(--font-fredoka)" }}
+                    >
+                      <Mail className="h-5 w-5" />
+                      Sign in with Email
+                    </motion.button>
+                    <span className="absolute -top-2 right-3 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-bold text-amber-600 border border-amber-200">
+                      Coming soon
+                    </span>
+                  </div>
                 </div>
 
                 <motion.div

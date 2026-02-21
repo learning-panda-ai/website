@@ -84,25 +84,25 @@ export default function AskTab() {
             <button
               key={id}
               onClick={() => setMode(id)}
-              className={`flex flex-col items-center gap-2.5 py-5 px-3 rounded-2xl border-2 transition-all text-center ${
+              className={`flex flex-col items-center gap-2 sm:gap-2.5 py-3 sm:py-5 px-2 sm:px-3 rounded-2xl border-2 transition-all text-center ${
                 isActive ? activeClass : inactiveClass
               }`}
             >
               <div
-                className={`h-11 w-11 rounded-xl flex items-center justify-center ${
+                className={`h-9 w-9 sm:h-11 sm:w-11 rounded-xl flex items-center justify-center ${
                   isActive ? iconActive : iconInactive
                 }`}
               >
-                <Icon className={`h-5 w-5 ${isActive ? "text-white" : iconColor}`} />
+                <Icon className={`h-4 w-4 sm:h-5 sm:w-5 ${isActive ? "text-white" : iconColor}`} />
               </div>
               <div>
                 <p
-                  className={`text-sm font-extrabold ${isActive ? "text-white" : "text-gray-800"}`}
+                  className={`text-xs sm:text-sm font-extrabold ${isActive ? "text-white" : "text-gray-800"}`}
                   style={{ fontFamily: "var(--font-fredoka)" }}
                 >
                   {modeLabel}
                 </p>
-                <p className={`text-xs mt-0.5 ${isActive ? "text-white/80" : "text-gray-400"}`}>
+                <p className={`hidden sm:block text-xs mt-0.5 ${isActive ? "text-white/80" : "text-gray-400"}`}>
                   {desc}
                 </p>
               </div>
