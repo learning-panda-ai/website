@@ -125,6 +125,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <GoogleAnalytics gaId="G-KEEZ203GH9" />
+      <meta name="google-site-verification" content="cPLnYePszcQV3XSX7P_ANBl2ciJsPhHKwFBuu0ABlrE" />
       <body
         className={`${nunito.variable} ${fredoka.variable} ${geistMono.variable} antialiased`}
       >
