@@ -23,7 +23,6 @@ export default async function SettingsPage() {
       parentMobile: true,
       parentEmail: true,
       courses: true,
-      aiTutor: true,
       createdAt: true,
     },
   });
@@ -34,6 +33,7 @@ export default async function SettingsPage() {
     <SettingsClient
       user={{
         ...user,
+        aiTutor: null,
         createdAt: user.createdAt.toISOString(),
       }}
     />
