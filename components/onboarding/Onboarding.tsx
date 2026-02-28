@@ -13,11 +13,7 @@ import {
   Palette,
   Loader2,
   CheckCircle2,
-  Trophy,
-  Atom,
-  BookMarked,
   School,
-  Lock,
 } from "lucide-react";
 import BasicDetails, { type BasicDetailsData } from "@/components/onboarding/BasicDetails";
 
@@ -25,17 +21,17 @@ import BasicDetails, { type BasicDetailsData } from "@/components/onboarding/Bas
 
 const grades = [
   { id: "class-1",  label: "Class 1",  emoji: "🌱", enabled: false },
-  { id: "class-2",  label: "Class 2",  emoji: "🦋", enabled: false },
-  { id: "class-3",  label: "Class 3",  emoji: "🌈", enabled: false },
-  { id: "class-4",  label: "Class 4",  emoji: "🎨", enabled: false },
+  { id: "class-2",  label: "Class 2",  emoji: "🌿", enabled: false },
+  { id: "class-3",  label: "Class 3",  emoji: "🍀", enabled: false },
+  { id: "class-4",  label: "Class 4",  emoji: "🌻", enabled: false },
   { id: "class-5",  label: "Class 5",  emoji: "⭐", enabled: false },
-  { id: "class-6",  label: "Class 6",  emoji: "🌊", enabled: false },
-  { id: "class-7",  label: "Class 7",  emoji: "🔐", enabled: false },
-  { id: "class-8",  label: "Class 8",  Icon: BookMarked, color: "text-blue-600",  bg: "bg-blue-50",  enabled: true  },
-  { id: "class-9",  label: "Class 9",  Icon: Atom,       color: "text-purple-600", bg: "bg-purple-50", enabled: true  },
-  { id: "class-10", label: "Class 10", Icon: Trophy,     color: "text-amber-600",  bg: "bg-amber-50",  enabled: true  },
-  { id: "class-11", label: "Class 11", emoji: "📊", enabled: false },
-  { id: "class-12", label: "Class 12", emoji: "🎓", enabled: false },
+  { id: "class-6",  label: "Class 6",  emoji: "🌟", enabled: false },
+  { id: "class-7",  label: "Class 7",  emoji: "🔥", enabled: false },
+  { id: "class-8",  label: "Class 8",  emoji: "💫", enabled: true  },
+  { id: "class-9",  label: "Class 9",  emoji: "🚀", enabled: true  },
+  { id: "class-10", label: "Class 10", emoji: "🏆", enabled: true  },
+  { id: "class-11", label: "Class 11", emoji: "💎", enabled: false },
+  { id: "class-12", label: "Class 12", emoji: "👑", enabled: false },
 ];
 
 const schoolBoards = ["CBSE", "ICSE", "State Board", "Other"];
@@ -349,23 +345,20 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
               <div className="grid grid-cols-4 gap-2 sm:grid-cols-6 mb-8">
                 {grades.map((g) => {
                   const sel = selectedGrade === g.id;
-                  if (g.enabled && g.Icon) {
-                    // Enabled grades – icon + label
+                  if (g.enabled) {
                     return (
                       <motion.button
                         key={g.id}
                         whileHover={{ scale: 1.07, y: -3 }}
                         whileTap={{ scale: 0.95 }}
                         onClick={() => setSelectedGrade(g.id)}
-                        className={`col-span-2 flex flex-col items-center gap-2 rounded-2xl border-2 px-3 py-4 text-center transition-all ${
+                        className={`col-span-2 flex flex-col items-center gap-1 rounded-2xl border-2 px-2 py-3 text-center transition-all ${
                           sel
                             ? "border-green-400 bg-green-50 shadow-md shadow-green-200/50"
                             : "border-green-100 bg-white hover:border-green-300 hover:bg-green-50/50"
                         }`}
                       >
-                        <span className={`flex h-10 w-10 items-center justify-center rounded-xl ${g.bg}`}>
-                          <g.Icon className={`h-5 w-5 ${g.color}`} />
-                        </span>
+                        <span className="text-xl">{g.emoji}</span>
                         <span className={`text-xs font-bold ${sel ? "text-green-700" : "text-green-600"}`}>{g.label}</span>
                       </motion.button>
                     );
@@ -377,9 +370,7 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
                       className="flex flex-col items-center gap-1 rounded-2xl border-2 border-green-50 bg-gray-50 px-2 py-3 text-center opacity-40 cursor-not-allowed"
                       title="Coming soon"
                     >
-                      <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-gray-100">
-                        <Lock className="h-3.5 w-3.5 text-gray-400" />
-                      </span>
+                      <span className="text-xl">{g.emoji}</span>
                       <span className="text-[10px] font-bold text-gray-400">{g.label}</span>
                     </div>
                   );
