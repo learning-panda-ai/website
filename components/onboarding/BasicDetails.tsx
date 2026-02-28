@@ -144,33 +144,23 @@ export default function BasicDetails({ data, onChange }: BasicDetailsProps) {
         {/* First Name & Last Name */}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
-            <label
-              className="mb-1 block text-xs font-bold text-green-700"
-              style={{ fontFamily: "var(--font-fredoka)" }}
-            >
-              First Name
-            </label>
+            <label className="panda-label">First Name</label>
             <input
               type="text"
               value={data.firstName}
               onChange={(e) => update("firstName", e.target.value)}
               placeholder="e.g. Aarav"
-              className="panda-input w-full"
+              className="panda-input"
             />
           </div>
           <div>
-            <label
-              className="mb-1 block text-xs font-bold text-green-700"
-              style={{ fontFamily: "var(--font-fredoka)" }}
-            >
-              Last Name
-            </label>
+            <label className="panda-label">Last Name</label>
             <input
               type="text"
               value={data.lastName}
               onChange={(e) => update("lastName", e.target.value)}
               placeholder="e.g. Sharma"
-              className="panda-input w-full"
+              className="panda-input"
             />
           </div>
         </div>
@@ -230,30 +220,20 @@ export default function BasicDetails({ data, onChange }: BasicDetailsProps) {
 
         {/* Parent Name */}
         <div>
-          <label
-            className="mb-1 block text-xs font-bold text-green-700"
-            style={{ fontFamily: "var(--font-fredoka)" }}
-          >
-            Parent / Guardian Name
-          </label>
+          <label className="panda-label">Parent / Guardian Name</label>
           <input
             type="text"
             value={data.parentName}
             onChange={(e) => update("parentName", e.target.value)}
             placeholder="e.g. Priya Sharma"
-            className="panda-input w-full"
+            className="panda-input"
           />
         </div>
 
         {/* Parent Mobile & Email */}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
-            <label
-              className="mb-1 block text-xs font-bold text-green-700"
-              style={{ fontFamily: "var(--font-fredoka)" }}
-            >
-              Parent Mobile Number
-            </label>
+            <label className="panda-label">Parent Mobile Number</label>
             <input
               type="tel"
               value={data.parentMobile}
@@ -274,12 +254,7 @@ export default function BasicDetails({ data, onChange }: BasicDetailsProps) {
             )}
           </div>
           <div>
-            <label
-              className="mb-1 block text-xs font-bold text-green-700"
-              style={{ fontFamily: "var(--font-fredoka)" }}
-            >
-              Parent Email
-            </label>
+            <label className="panda-label">Parent Email</label>
             <input
               type="email"
               value={data.parentEmail}

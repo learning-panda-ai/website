@@ -123,7 +123,7 @@ export default function LandingPage() {
 
       {/* ── Hero ── */}
       <section
-        className="relative pt-28 pb-24 overflow-hidden"
+        className="relative pt-16 pb-24 overflow-hidden"
         style={{
           background:
             "radial-gradient(ellipse 120% 80% at 50% -10%, #FFFDE7 0%, #F1F8E9 35%, #E8F5E9 60%, #ffffff 100%)",
