@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Nunito, Fredoka, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Providers from "./providers";
+import { GoogleAnalytics } from "@next/third-parties/google";
 
 const nunito = Nunito({
   variable: "--font-nunito",
@@ -34,6 +35,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <GoogleAnalytics gaId="G-0YLN09XG88" />
       <body
         className={`${nunito.variable} ${fredoka.variable} ${geistMono.variable} antialiased`}
       >
