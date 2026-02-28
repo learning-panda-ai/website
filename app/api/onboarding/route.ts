@@ -13,7 +13,8 @@ export async function POST(request: Request) {
     const {
       firstName, lastName, city, state,
       parentName, parentMobile, parentEmail,
-      grade, courses, aiTutor,
+      grade, schoolBoard, courses,
+      favoriteSubject, studyFeeling, careerThoughts, strengthsInterest,
     } = await request.json();
 
     const user = await prisma.user.update({
@@ -27,8 +28,12 @@ export async function POST(request: Request) {
         parentMobile,
         parentEmail,
         grade,
+        schoolBoard,
         courses,
-        aiTutor,
+        favoriteSubject,
+        studyFeeling,
+        careerThoughts,
+        strengthsInterest,
         onboarded: true,
       },
     });
@@ -39,8 +44,8 @@ export async function POST(request: Request) {
         firstName: user.firstName,
         lastName: user.lastName,
         grade: user.grade,
+        schoolBoard: user.schoolBoard,
         courses: user.courses,
-        aiTutor: user.aiTutor,
         onboarded: user.onboarded,
       },
     });
