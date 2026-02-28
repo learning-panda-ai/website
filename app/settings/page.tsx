@@ -1,7 +1,14 @@
+import type { Metadata } from "next";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import SettingsClient from "./SettingsClient";
+
+export const metadata: Metadata = {
+  title: "Account Settings",
+  description: "Manage your Learning Panda account settings, profile, and preferences.",
+  robots: { index: false, follow: false },
+};
 
 export default async function SettingsPage() {
   const session = await auth();

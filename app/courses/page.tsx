@@ -1,7 +1,14 @@
+import type { Metadata } from "next";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import CoursesClient from "./CoursesClient";
+
+export const metadata: Metadata = {
+  title: "My Courses",
+  description: "Browse and continue your enrolled courses on Learning Panda.",
+  robots: { index: false, follow: false },
+};
 
 export default async function CoursesPage() {
   const session = await auth();

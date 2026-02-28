@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { redirect, notFound } from "next/navigation";
@@ -6,6 +7,28 @@ import CourseDetailClient from "./CourseDetailClient";
 
 interface Props {
   params: Promise<{ courseId: string }>;
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { courseId } = await params;
+  const course = getCourseBySlug(courseId);
+
+  if (!course) {
+    return {
+      title: "Course Not Found",
+      robots: { index: false, follow: false },
+    };
+  }
+
+  return {
+    title: `${course.name} — ${course.category} Course`,
+    description: course.description,
+    robots: { index: false, follow: false },
+    openGraph: {
+      title: `${course.name} | Learning Panda`,
+      description: course.description,
+    },
+  };
 }
 
 export default async function CourseDetailPage({ params }: Props) {

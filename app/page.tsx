@@ -113,12 +113,196 @@ const testimonials = [
   },
 ];
 
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://learningpanda.ai";
+
+const websiteSchema = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  name: "Learning Panda",
+  url: BASE_URL,
+  description:
+    "AI-powered study companion that helps K-12 students master any subject with instant explanations, personalized practice, and 24/7 availability.",
+  potentialAction: {
+    "@type": "SearchAction",
+    target: `${BASE_URL}/courses?q={search_term_string}`,
+    "query-input": "required name=search_term_string",
+  },
+};
+
+const organizationSchema = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  name: "Learning Panda",
+  url: BASE_URL,
+  logo: `${BASE_URL}/favicon.ico`,
+  description:
+    "Learning Panda provides AI-powered tutoring for K-12 and university students across all subjects including math, science, English, history, and computer science.",
+  foundingDate: "2024",
+  knowsAbout: [
+    "AI tutoring",
+    "K-12 education",
+    "Math tutoring",
+    "Science education",
+    "Personalized learning",
+    "Homework help",
+  ],
+  sameAs: [],
+};
+
+const softwareApplicationSchema = {
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  name: "Learning Panda",
+  applicationCategory: "EducationalApplication",
+  applicationSubCategory: "AI Tutoring",
+  operatingSystem: "Web",
+  url: BASE_URL,
+  description:
+    "AI-powered study buddy that helps students from Grade 1 through university master every subject with instant explanations, practice problems, and progress tracking.",
+  featureList: [
+    "Adaptive Learning",
+    "Instant Answers",
+    "24/7 Availability",
+    "Progress Tracking",
+    "Gamified Learning",
+    "All Subjects Covered",
+    "Personalized Practice Problems",
+    "Step-by-step Explanations",
+  ],
+  offers: {
+    "@type": "Offer",
+    price: "0",
+    priceCurrency: "USD",
+    description: "Free forever plan with no credit card required",
+  },
+  aggregateRating: {
+    "@type": "AggregateRating",
+    ratingValue: "5",
+    ratingCount: "3",
+    bestRating: "5",
+    worstRating: "1",
+    reviewCount: "3",
+  },
+  review: [
+    {
+      "@type": "Review",
+      reviewRating: { "@type": "Rating", ratingValue: "5", bestRating: "5" },
+      author: { "@type": "Person", name: "Sarah M." },
+      reviewBody:
+        "Learning Panda helped me go from a C to an A in Math! The explanations are so clear and the practice problems are perfectly tailored.",
+    },
+    {
+      "@type": "Review",
+      reviewRating: { "@type": "Rating", ratingValue: "5", bestRating: "5" },
+      author: { "@type": "Person", name: "James T." },
+      reviewBody:
+        "I love how it explains things in a fun way. It's like having a super-smart friend who's always available to help me study.",
+    },
+    {
+      "@type": "Review",
+      reviewRating: { "@type": "Rating", ratingValue: "5", bestRating: "5" },
+      author: { "@type": "Person", name: "Priya K." },
+      reviewBody:
+        "The adaptive learning feature is incredible. It knows exactly where I'm struggling and keeps pushing me to improve.",
+    },
+  ],
+};
+
+// FAQPage schema — optimised for AEO (answer engine) & GEO (AI search)
+const faqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: [
+    {
+      "@type": "Question",
+      name: "What is Learning Panda?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "Learning Panda is an AI-powered study companion that helps K-12 students and university students master any subject. It provides instant homework help, step-by-step explanations, personalized practice problems, and progress tracking — available free, 24/7.",
+      },
+    },
+    {
+      "@type": "Question",
+      name: "What subjects does Learning Panda cover?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "Learning Panda covers all major school and university subjects including Mathematics (Algebra, Geometry, Calculus, Statistics), Science (Physics, Chemistry, Biology), Computer Science, History, English Literature and Grammar, Geography, Arts & Design, and Economics — from primary school through university level.",
+      },
+    },
+    {
+      "@type": "Question",
+      name: "Is Learning Panda free to use?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "Yes, Learning Panda is completely free to start. There is a free forever plan with no credit card required. You can sign up and start learning immediately without any payment information.",
+      },
+    },
+    {
+      "@type": "Question",
+      name: "How does Learning Panda use AI to help students?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "Learning Panda uses advanced artificial intelligence to provide personalised explanations tailored to each student's grade level and learning style. It adapts difficulty automatically, generates custom practice problems, tracks progress visually, and is available 24/7 for instant homework help. Students can type questions or describe their homework and receive clear, step-by-step guidance.",
+      },
+    },
+    {
+      "@type": "Question",
+      name: "What grades does Learning Panda support?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "Learning Panda supports students from primary school (Grade 1) all the way through university level. The AI automatically adapts its explanations, vocabulary, and difficulty to match the student's grade level and learning pace.",
+      },
+    },
+    {
+      "@type": "Question",
+      name: "How is Learning Panda different from other tutoring apps?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "Learning Panda stands out through its adaptive AI that personalises learning for each student, gamification features like badges and streaks, 24/7 instant availability (no scheduling needed), coverage of all subjects in one place, and a free forever plan with no credit card required. Unlike traditional tutoring, it's always available and infinitely patient.",
+      },
+    },
+    {
+      "@type": "Question",
+      name: "Can Learning Panda help with math homework?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "Yes, Learning Panda excels at mathematics tutoring. It helps with algebra, geometry, calculus, statistics, arithmetic, and more. It provides step-by-step solutions with clear explanations so students understand the concept, not just the answer, and then generates personalised practice problems to reinforce understanding.",
+      },
+    },
+    {
+      "@type": "Question",
+      name: "Is Learning Panda suitable for primary school children?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "Yes, Learning Panda is designed to be safe, friendly, and appropriate for young learners. The AI adjusts its language and explanation style to be age-appropriate, using simple words, fun analogies, and encouraging feedback to keep young students motivated.",
+      },
+    },
+  ],
+};
+
 export default function LandingPage() {
   const { data: session } = useSession();
   const isLoggedIn = !!session?.user;
 
   return (
     <div className="min-h-screen bg-white" style={{ fontFamily: "var(--font-nunito)" }}>
+      {/* Structured Data — SEO / GEO / AEO */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareApplicationSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+      />
       <Navbar />
 
       {/* ── Hero ── */}

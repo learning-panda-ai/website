@@ -1,0 +1,20 @@
+{
+  "name": "Learning Panda",
+  "short_name": "Learning Panda",
+  "description": "AI-powered study buddy for every subject and grade. Free, 24/7 homework help and personalized learning.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#4CAF50",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "en",
+  "categories": ["education", "kids"],
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "any",
+      "type": "image/x-icon"
+    }
+  ]
+}
