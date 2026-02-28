@@ -32,10 +32,14 @@ model User {
   parentEmail    String?
 
   // Onboarding data
-  grade          String?
-  courses        String[]  @default([])
-  aiTutor        String?
-  onboarded      Boolean   @default(false)
+  grade             String?
+  schoolBoard       String?
+  courses           String[]  @default([])
+  favoriteSubject   String?
+  studyFeeling      String?
+  careerThoughts    String?
+  strengthsInterest String?
+  onboarded         Boolean   @default(false)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
