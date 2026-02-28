@@ -35,7 +35,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <GoogleAnalytics gaId="G-0YLN09XG88" />
+      <GoogleAnalytics gaId="G-KEEZ203GH9" />
       <body
         className={`${nunito.variable} ${fredoka.variable} ${geistMono.variable} antialiased`}
       >
