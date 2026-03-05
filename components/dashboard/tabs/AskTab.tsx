@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import type { ElementType } from "react";
-import { MessageSquare, Video, Mic } from "lucide-react";
+import { History, ArrowRight, Plus, X } from "lucide-react";
+import Link from "next/link";
 import TextChatUI from "../ask/TextChatUI";
 import VideoChatUI from "../ask/VideoChatUI";
 import AudioChatUI from "../ask/AudioChatUI";
@@ -11,142 +11,280 @@ import { tabAnim } from "../types";
 
 type ChatMode = "text" | "video" | "audio";
 
-const CHAT_MODES: {
-  id: ChatMode;
-  label: string;
-  Icon: ElementType;
-  desc: string;
-  activeClass: string;
-  inactiveClass: string;
-  iconActive: string;
-  iconInactive: string;
-  iconColor: string;
-}[] = [
-  {
-    id: "text",
-    label: "Text Chat",
-    Icon: MessageSquare,
-    desc: "Type your questions",
-    activeClass: "bg-blue-600 border-blue-600 shadow-lg scale-[1.02]",
-    inactiveClass: "bg-white border-blue-200 hover:bg-blue-50",
-    iconActive: "bg-blue-500/30",
-    iconInactive: "bg-blue-50",
-    iconColor: "text-blue-600",
-  },
-  {
-    id: "video",
-    label: "Video Chat",
-    Icon: Video,
-    desc: "Face-to-face with Panda",
-    activeClass: "bg-purple-600 border-purple-600 shadow-lg scale-[1.02]",
-    inactiveClass: "bg-white border-purple-200 hover:bg-purple-50",
-    iconActive: "bg-purple-500/30",
-    iconInactive: "bg-purple-50",
-    iconColor: "text-purple-600",
-  },
-  {
-    id: "audio",
-    label: "Voice Chat",
-    Icon: Mic,
-    desc: "Speak with Panda",
-    activeClass: "bg-green-600 border-green-600 shadow-lg scale-[1.02]",
-    inactiveClass: "bg-white border-green-200 hover:bg-green-50",
-    iconActive: "bg-green-500/30",
-    iconInactive: "bg-green-50",
-    iconColor: "text-green-600",
-  },
-];
+interface SessionOut {
+  id: string;
+  subject: string;
+  class_name: string;
+  title: string;
+  created_at: string;
+  updated_at: string;
+}
 
-const PANEL_HEADERS: Record<
-  ChatMode,
-  { bg: string; Icon: ElementType; color: string; label: string }
-> = {
-  text:  { bg: "bg-blue-100",   Icon: MessageSquare, color: "text-blue-600",   label: "Text Chat"  },
-  video: { bg: "bg-purple-100", Icon: Video,         color: "text-purple-600", label: "Video Chat" },
-  audio: { bg: "bg-green-100",  Icon: Mic,           color: "text-green-600",  label: "Voice Chat" },
+function timeAgo(isoDate: string): string {
+  const diff = Date.now() - new Date(isoDate).getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return "just now";
+  if (mins < 60) return `${mins}m ago`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs}h ago`;
+  return `${Math.floor(hrs / 24)}d ago`;
+}
+
+const SUBJECT_EMOJI: Record<string, string> = {
+  Mathematics: "📐", Physics: "⚛️", Chemistry: "🧪", Biology: "🧬",
+  Science: "🔬", "Computer Science": "💻", English: "📖", Hindi: "🇮🇳",
 };
 
-export default function AskTab() {
-  const [mode, setMode] = useState<ChatMode>("text");
-  const { bg, Icon: PanelIcon, color, label } = PANEL_HEADERS[mode];
+const MODE_LABEL: Record<ChatMode, string> = {
+  text: "Text Chat", video: "Video Chat", audio: "Voice Chat",
+};
+
+interface AskTabProps {
+  mode: ChatMode;
+  grade: string | null;
+  enrolledCourses: string[];
+}
+
+export default function AskTab({ mode, grade, enrolledCourses }: AskTabProps) {
+  const [availableSubjects, setAvailableSubjects] = useState<string[]>([]);
+  const [subjectsLoading, setSubjectsLoading] = useState(true);
+  const [subject, setSubject] = useState("");
+  const [sessions, setSessions] = useState<SessionOut[]>([]);
+  const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
+  const [showHistory, setShowHistory] = useState(false);
+  const [chatInstanceKey, setChatInstanceKey] = useState(0);
+  // Skips the activeSessionId reset on the very first subject assignment.
+  const subjectInitialized = useRef(false);
+
+  useEffect(() => {
+    setSubjectsLoading(true);
+    fetch("/api/user/available-subjects")
+      .then((r) => (r.ok ? r.json() : []))
+      .then((subjects: string[]) => {
+        setAvailableSubjects(subjects);
+        if (subjects.length > 0) {
+          setSubject((prev) => (subjects.includes(prev) ? prev : subjects[0]));
+        } else {
+          setSubject("");
+        }
+      })
+      .catch(() => {
+        setAvailableSubjects([]);
+        setSubject("");
+      })
+      .finally(() => setSubjectsLoading(false));
+  }, []);
+
+  const className = grade ? grade.replace("class-", "") : "";
+
+  const refreshSessions = useCallback(() => {
+    fetch("/api/chat/sessions")
+      .then((r) => (r.ok ? r.json() : []))
+      .then((data: SessionOut[]) => setSessions(data))
+      .catch(() => {});
+  }, []);
+
+  useEffect(() => { refreshSessions(); }, [refreshSessions]);
+
+  useEffect(() => {
+    setActiveSessionId(null);
+    setShowHistory(false);
+  }, [mode]);
+
+  useEffect(() => {
+    // Skip the reset on the very first subject assignment (initial load or session restore).
+    if (!subjectInitialized.current) {
+      subjectInitialized.current = true;
+      return;
+    }
+    setActiveSessionId(null);
+    setChatInstanceKey((k) => k + 1);
+    setShowHistory(false);
+  }, [subject]);
+
+  function openSession(id: string) {
+    setActiveSessionId(id);
+    setChatInstanceKey((k) => k + 1);
+    setShowHistory(false);
+  }
 
   return (
-    <motion.div key="ask" {...tabAnim} className="space-y-6">
-      <h2 className="text-2xl font-extrabold text-gray-800" style={{ fontFamily: "var(--font-fredoka)" }}>
-        Ask Panda
-      </h2>
+    <motion.div key={mode} {...tabAnim} className="space-y-6">
 
-      {/* Mode selector */}
-      <div className="grid grid-cols-3 gap-3">
-        {CHAT_MODES.map(({ id, label: modeLabel, Icon, desc, activeClass, inactiveClass, iconActive, iconInactive, iconColor }) => {
-          const isActive = mode === id;
-          return (
-            <button
-              key={id}
-              onClick={() => setMode(id)}
-              className={`flex flex-col items-center gap-2 sm:gap-2.5 py-3 sm:py-5 px-2 sm:px-3 rounded-2xl border-2 transition-all text-center ${
-                isActive ? activeClass : inactiveClass
-              }`}
-            >
-              <div
-                className={`h-9 w-9 sm:h-11 sm:w-11 rounded-xl flex items-center justify-center ${
-                  isActive ? iconActive : iconInactive
+      {/* Heading row */}
+      <div className="flex items-center justify-between gap-3">
+        <h2
+          className="text-2xl font-extrabold text-gray-800"
+          style={{ fontFamily: "var(--font-fredoka)" }}
+        >
+          {MODE_LABEL[mode]}
+        </h2>
+
+        <div className="flex items-center gap-2">
+          {mode === "text" && (
+            <>
+              {/* Subject dropdown */}
+              <div className="relative">
+                <select
+                  value={subject}
+                  onChange={(e) => setSubject(e.target.value)}
+                  disabled={subjectsLoading || availableSubjects.length === 0}
+                  className="appearance-none bg-gray-50 border border-gray-200 rounded-xl pl-3 pr-8 py-2 text-sm font-bold text-gray-700 outline-none focus:border-blue-400 focus:bg-white transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                  style={{ fontFamily: "var(--font-nunito)" }}
+                >
+                  {subjectsLoading ? (
+                    <option value="">Loading...</option>
+                  ) : availableSubjects.length === 0 ? (
+                    <option value="">No subjects available</option>
+                  ) : (
+                    availableSubjects.map((s) => (
+                      <option key={s} value={s}>{s}</option>
+                    ))
+                  )}
+                </select>
+                <div className="pointer-events-none absolute inset-y-0 right-2.5 flex items-center">
+                  <svg className="h-3.5 w-3.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </div>
+              </div>
+
+              {/* History toggle */}
+              <button
+                onClick={() => setShowHistory((v) => !v)}
+                title="Chat history"
+                className={`h-9 w-9 flex items-center justify-center rounded-xl border transition-all ${
+                  showHistory
+                    ? "bg-blue-600 border-blue-600 text-white"
+                    : "bg-gray-50 border-gray-200 text-gray-500 hover:bg-gray-100"
                 }`}
               >
-                <Icon className={`h-4 w-4 sm:h-5 sm:w-5 ${isActive ? "text-white" : iconColor}`} />
+                <History className="h-4 w-4" />
+              </button>
+            </>
+          )}
+        </div>
+      </div>
+
+      {/* Chat / History panel */}
+      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+        <AnimatePresence mode="wait">
+          {showHistory ? (
+            <motion.div
+              key="history"
+              initial={{ opacity: 0, y: 4 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -4 }}
+              transition={{ duration: 0.15 }}
+              className="flex flex-col h-[600px]"
+            >
+              {/* History header */}
+              <div className="flex items-center justify-between mb-4 flex-shrink-0">
+                <p className="font-extrabold text-gray-800 text-sm" style={{ fontFamily: "var(--font-fredoka)" }}>
+                  Recent Sessions
+                </p>
+                <button
+                  onClick={() => setShowHistory(false)}
+                  className="h-7 w-7 flex items-center justify-center rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-all"
+                >
+                  <X className="h-4 w-4" />
+                </button>
               </div>
-              <div>
-                <p
-                  className={`text-xs sm:text-sm font-extrabold ${isActive ? "text-white" : "text-gray-800"}`}
+
+              {/* Session list */}
+              <div className="flex-1 overflow-y-auto space-y-2 min-h-0">
+                {sessions.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center h-full text-center">
+                    <span className="text-4xl mb-3">💬</span>
+                    <p className="text-sm font-bold text-gray-500 mb-1">No sessions yet</p>
+                    <p className="text-xs text-gray-400">Start a conversation to see your history here.</p>
+                  </div>
+                ) : (
+                  sessions.slice(0, 7).map((session) => {
+                    const isActive = session.id === activeSessionId;
+                    return (
+                      <div
+                        key={session.id}
+                        className={`flex items-center gap-3 p-3 rounded-xl border transition-all ${
+                          isActive ? "border-blue-200 bg-blue-50" : "border-gray-100 bg-gray-50 hover:bg-gray-100"
+                        }`}
+                      >
+                        <span className="text-xl flex-shrink-0">{SUBJECT_EMOJI[session.subject] ?? "📚"}</span>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-bold text-gray-800 truncate">{session.title}</p>
+                          <p className="text-xs text-gray-400">
+                            {session.subject} · Class {session.class_name} · {timeAgo(session.updated_at)}
+                          </p>
+                        </div>
+                        <button
+                          onClick={() => openSession(session.id)}
+                          className="flex items-center gap-1 text-xs font-bold text-blue-600 hover:text-blue-700 flex-shrink-0"
+                        >
+                          {isActive ? "Active" : "Continue"}
+                          {!isActive && <ArrowRight className="h-3 w-3" />}
+                        </button>
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+
+              {/* View all */}
+              <div className="pt-3 border-t border-gray-100 mt-3 flex-shrink-0">
+                <Link
+                  href="/dashboard/history"
+                  className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl text-sm font-bold text-blue-600 hover:bg-blue-50 border border-blue-100 transition-all"
                   style={{ fontFamily: "var(--font-fredoka)" }}
                 >
-                  {modeLabel}
-                </p>
-                <p className={`hidden sm:block text-xs mt-0.5 ${isActive ? "text-white/80" : "text-gray-400"}`}>
-                  {desc}
-                </p>
+                  View All Sessions
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
               </div>
-            </button>
-          );
-        })}
-      </div>
-
-      {/* Chat panel */}
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
-        <div className="flex items-center gap-2 mb-4">
-          <div className={`h-8 w-8 rounded-xl ${bg} flex items-center justify-center`}>
-            <PanelIcon className={`h-4 w-4 ${color}`} />
-          </div>
-          <p className="font-extrabold text-gray-800 text-sm" style={{ fontFamily: "var(--font-fredoka)" }}>
-            {label}
-          </p>
-        </div>
-
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={mode}
-            initial={{ opacity: 0, y: 6 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -6 }}
-            transition={{ duration: 0.18 }}
-          >
-            {mode === "text"  && <TextChatUI />}
-            {mode === "video" && <VideoChatUI />}
-            {mode === "audio" && <AudioChatUI />}
-          </motion.div>
+            </motion.div>
+          ) : (
+            <motion.div
+              key={`chat-${mode}-${chatInstanceKey}`}
+              initial={{ opacity: 0, y: 4 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -4 }}
+              transition={{ duration: 0.15 }}
+            >
+              {mode === "text" && activeSessionId && (
+                <div className="flex justify-end mb-3">
+                  <button
+                    onClick={() => { setActiveSessionId(null); setChatInstanceKey((k) => k + 1); }}
+                    className="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-700 font-bold"
+                  >
+                    <Plus className="h-3 w-3" />
+                    New chat
+                  </button>
+                </div>
+              )}
+              {mode === "text" && !subjectsLoading && availableSubjects.length === 0 && (
+                <div className="flex flex-col items-center justify-center min-h-[340px] text-center gap-3 p-8 bg-gray-50 rounded-2xl border border-gray-100">
+                  <span className="text-5xl">📚</span>
+                  <p className="text-base font-extrabold text-gray-700" style={{ fontFamily: "var(--font-fredoka)" }}>
+                    No content available yet
+                  </p>
+                  <p className="text-sm text-gray-400 max-w-xs">
+                    Study material for your class and board hasn&apos;t been added yet. Check back soon!
+                  </p>
+                </div>
+              )}
+              {mode === "text" && subject && (
+                <TextChatUI
+                  subject={subject}
+                  className={className}
+                  initialSessionId={activeSessionId ?? undefined}
+                  onSessionCreated={(id) => { setActiveSessionId(id); refreshSessions(); }}
+                  key={chatInstanceKey}
+                />
+              )}
+              {mode === "video" && <VideoChatUI />}
+              {mode === "audio" && <AudioChatUI />}
+            </motion.div>
+          )}
         </AnimatePresence>
-      </div>
-
-      {/* Recent sessions */}
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-        <h3 className="font-extrabold text-gray-800 mb-4" style={{ fontFamily: "var(--font-fredoka)" }}>
-          Recent Sessions
-        </h3>
-        <div className="flex flex-col items-center py-8 text-center">
-          <span className="text-3xl mb-3">💬</span>
-          <p className="text-sm font-bold text-gray-500 mb-1">No sessions yet</p>
-          <p className="text-xs text-gray-400">Start a conversation to see your history here.</p>
-        </div>
       </div>
     </motion.div>
   );

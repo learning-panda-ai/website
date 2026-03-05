@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { signOut } from "next-auth/react";
+import { useAuth } from "@/app/providers";
 import Link from "next/link";
 import {
   Bell,
@@ -22,6 +22,7 @@ interface CoursesClientProps {
 }
 
 export default function CoursesClient({ user }: CoursesClientProps) {
+  const { logout } = useAuth();
   const firstName = user.name?.split(" ")[0] ?? "Learner";
 
   // Map enrolled course names to their catalog entries
@@ -84,7 +85,7 @@ export default function CoursesClient({ user }: CoursesClientProps) {
               </span>
             </div>
             <button
-              onClick={() => signOut({ callbackUrl: "/" })}
+              onClick={logout}
               className="flex items-center gap-1.5 text-xs font-bold text-gray-400 hover:text-red-500 transition-colors"
             >
               <LogOut className="h-4 w-4" />

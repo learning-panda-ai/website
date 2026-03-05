@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
-import { signOut } from "next-auth/react";
+import { useAuth } from "@/app/providers";
 import {
   User,
   Shield,
@@ -34,6 +34,7 @@ type UserProp = {
   city: string | null;
   state: string | null;
   grade: string | null;
+  schoolBoard: string | null;
   parentName: string | null;
   parentMobile: string | null;
   parentEmail: string | null;
@@ -50,6 +51,42 @@ const TABS: { id: Tab; label: string; Icon: React.ElementType; emoji: string }[]
   { id: "privacy",  label: "Privacy",  Icon: Lock,       emoji: "🛡️" },
   { id: "billing",  label: "Billing",  Icon: CreditCard, emoji: "💳" },
   { id: "usage",    label: "Usage",    Icon: BarChart2,  emoji: "📊" },
+];
+
+const COURSE_CATEGORIES = [
+  {
+    label: "Math 🔢",
+    courses: [
+      "Algebra 1", "Algebra 2", "Geometry", "Trigonometry",
+      "Statistics & Probability", "Linear Algebra", "Calculus",
+      "Pre-Calculus", "Arithmetic",
+    ],
+  },
+  {
+    label: "Science 🧪",
+    courses: [
+      "Physics", "Chemistry", "Biology",
+      "Environmental Science", "Earth Science", "Anatomy & Physiology",
+    ],
+  },
+  {
+    label: "Computing 💻",
+    courses: [
+      "Computer Science", "Programming (Python)", "Web Development",
+      "Data Structures", "Algorithms", "AI & Machine Learning",
+    ],
+  },
+  {
+    label: "Languages 🌍",
+    courses: [
+      "English Grammar", "English Literature", "Hindi",
+      "Spanish", "French", "Reading & Writing",
+    ],
+  },
+  {
+    label: "Arts & More 🎨",
+    courses: ["Art History", "Music Theory", "Design", "Health & Fitness"],
+  },
 ];
 
 const ALL_GRADES = [
@@ -178,16 +215,23 @@ function GeneralTab({ user }: { user: UserProp }) {
     city:         user.city         ?? "",
     state:        user.state        ?? "",
     grade:        user.grade        ?? "",
+    schoolBoard:  user.schoolBoard  ?? "",
     parentName:   user.parentName   ?? "",
     parentMobile: user.parentMobile ?? "",
     parentEmail:  user.parentEmail  ?? "",
   });
+  const [courses, setCourses] = useState<string[]>(user.courses);
   const [saving, setSaving] = useState(false);
   const [saved,  setSaved]  = useState(false);
   const [error,  setError]  = useState(false);
 
   const set = (field: keyof typeof form) => (val: string) =>
     setForm((f) => ({ ...f, [field]: val }));
+
+  const toggleCourse = (course: string) =>
+    setCourses((prev) =>
+      prev.includes(course) ? prev.filter((c) => c !== course) : [...prev, course]
+    );
 
   const handleSave = async () => {
     setSaving(true);
@@ -196,7 +240,7 @@ function GeneralTab({ user }: { user: UserProp }) {
       const res = await fetch("/api/user/profile", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify({ ...form, courses, schoolBoard: form.schoolBoard }),
       });
       if (res.ok) {
         setSaved(true);
@@ -258,21 +302,77 @@ function GeneralTab({ user }: { user: UserProp }) {
               <TextInput value={form.state} onChange={set("state")} placeholder="e.g. Maharashtra" />
             </div>
           </div>
-          <div>
-            <FieldLabel>Grade / Level</FieldLabel>
-            <select
-              value={form.grade}
-              onChange={(e) => set("grade")(e.target.value)}
-              className="panda-select"
-            >
-              <option value="">Select grade</option>
-              {ALL_GRADES.map((g) => (
-                <option key={g.id} value={g.id}>
-                  {g.label}
-                </option>
-              ))}
-            </select>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <FieldLabel>Grade / Level</FieldLabel>
+              <select
+                value={form.grade}
+                onChange={(e) => set("grade")(e.target.value)}
+                className="panda-select"
+              >
+                <option value="">Select grade</option>
+                {ALL_GRADES.map((g) => (
+                  <option key={g.id} value={g.id}>
+                    {g.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <FieldLabel>School Board</FieldLabel>
+              <select
+                value={form.schoolBoard}
+                onChange={(e) => set("schoolBoard")(e.target.value)}
+                className="panda-select"
+              >
+                <option value="">Select board</option>
+                {["CBSE", "ICSE", "IGCSE", "IB", "State Board", "Other"].map((b) => (
+                  <option key={b} value={b}>{b}</option>
+                ))}
+              </select>
+            </div>
           </div>
+        </div>
+      </SectionCard>
+
+      {/* Enrolled Courses */}
+      <SectionCard>
+        <SubTitle note="Select the subjects you want to study — this updates your Ask Panda options">
+          Enrolled Courses
+        </SubTitle>
+        <div className="space-y-5">
+          {COURSE_CATEGORIES.map((cat) => (
+            <div key={cat.label}>
+              <p className="text-xs font-extrabold text-gray-500 uppercase tracking-wider mb-2"
+                style={{ fontFamily: "var(--font-fredoka)" }}>
+                {cat.label}
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {cat.courses.map((course) => {
+                  const selected = courses.includes(course);
+                  return (
+                    <button
+                      key={course}
+                      type="button"
+                      onClick={() => toggleCourse(course)}
+                      className={`text-xs font-bold px-3 py-1.5 rounded-full border transition-all ${
+                        selected
+                          ? "bg-green-600 border-green-600 text-white"
+                          : "bg-white border-gray-200 text-gray-500 hover:border-green-400 hover:text-green-600"
+                      }`}
+                    >
+                      {course}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
+          {courses.length === 0 && (
+            <p className="text-xs text-amber-600 font-medium">
+              Select at least one course so Ask Panda knows what to help with.
+            </p>
+          )}
         </div>
       </SectionCard>
 
@@ -659,6 +759,7 @@ function UsageTab({ user }: { user: UserProp }) {
 // ── Main Settings Client ──────────────────────────────────────────────────
 
 export default function SettingsClient({ user }: { user: UserProp }) {
+  const { logout } = useAuth();
   const [activeTab, setActiveTab] = useState<Tab>("general");
 
   const displayName = user.firstName
@@ -707,7 +808,7 @@ export default function SettingsClient({ user }: { user: UserProp }) {
               </span>
             </div>
             <button
-              onClick={() => signOut({ callbackUrl: "/" })}
+              onClick={logout}
               className="flex items-center gap-1.5 text-xs font-bold text-gray-400 hover:text-red-500 transition-colors"
             >
               <LogOut className="h-4 w-4" />
@@ -794,7 +895,7 @@ export default function SettingsClient({ user }: { user: UserProp }) {
             </nav>
 
             {/* Tab content */}
-            <AnimatePresence mode="wait">
+            <AnimatePresence mode="wait" initial={false}>
               {activeTab === "general" && <GeneralTab user={user} key="general" />}
               {activeTab === "account" && <AccountTab user={user} key="account" />}
               {activeTab === "privacy" && <PrivacyTab key="privacy" />}

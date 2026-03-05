@@ -1,31 +1,33 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { useSession } from "next-auth/react";
+import { useAuth } from "@/app/providers";
 import { useRouter } from "next/navigation";
 import LoginSignup from "@/components/LoginSignup";
 import Onboarding from "@/components/onboarding/Onboarding";
 import { Sparkles, CheckCircle2 } from "lucide-react";
 
 export default function Home() {
-  const { data: session, status, update } = useSession();
+  const { user, status, refreshAuth } = useAuth();
   const router = useRouter();
   const [justOnboarded, setJustOnboarded] = useState(false);
+  const hasRedirected = useRef(false);
 
   // Already-onboarded users who land on /login get sent straight to dashboard
   useEffect(() => {
-    if (status === "authenticated" && session?.user?.onboarded && !justOnboarded) {
+    if (status === "authenticated" && user?.is_onboarded && !justOnboarded && !hasRedirected.current) {
+      hasRedirected.current = true;
       router.replace("/dashboard");
     }
-  }, [status, session, justOnboarded, router]);
+  }, [status, user, justOnboarded, router]);
 
   const view =
-    status === "loading" || !session?.user
+    status === "loading" || !user
       ? "auth"
       : justOnboarded
       ? "done"
-      : session.user.onboarded
+      : user.is_onboarded
       ? "redirecting"
       : "onboarding";
 
@@ -51,7 +53,7 @@ export default function Home() {
           exit={{ opacity: 0 }}
           transition={{ duration: 0.3 }}
         >
-          <Onboarding onComplete={async () => { await update(); setJustOnboarded(true); }} />
+          <Onboarding onComplete={async () => { await refreshAuth(); setJustOnboarded(true); }} />
         </motion.div>
       )}
 

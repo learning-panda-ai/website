@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
-import { auth } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
+import { requireAuth } from "@/lib/server-auth";
 import { redirect } from "next/navigation";
 import CoursesClient from "./CoursesClient";
+
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
 export const metadata: Metadata = {
   title: "My Courses",
@@ -11,19 +12,20 @@ export const metadata: Metadata = {
 };
 
 export default async function CoursesPage() {
-  const session = await auth();
-  if (!session?.user?.id) redirect("/login");
+  const token = await requireAuth();
 
-  const user = await prisma.user.findUnique({
-    where: { id: session.user.id },
-    select: { name: true, image: true, courses: true },
+  const res = await fetch(`${BACKEND_URL}/api/v1/auth/me`, {
+    headers: { Authorization: `Bearer ${token}` },
+    cache: "no-store",
   });
 
-  if (!user) redirect("/login");
+  if (!res.ok) redirect("/login");
+
+  const user = await res.json();
 
   return (
     <CoursesClient
-      user={{ name: user.name, image: user.image, courses: user.courses }}
+      user={{ name: user.name, image: user.image, courses: user.courses ?? [] }}
     />
   );
 }

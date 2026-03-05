@@ -2,12 +2,12 @@
 
 import { motion } from "framer-motion";
 import Link from "next/link";
-import type { Session } from "next-auth";
 import { Pencil } from "lucide-react";
 import { tabAnim } from "../types";
+import type { DashboardUser } from "@/app/dashboard/DashboardClient";
 
 interface ProfileTabProps {
-  user: Session["user"];
+  user: DashboardUser;
   enrolledCourses: string[];
 }
 
@@ -50,8 +50,8 @@ export default function ProfileTab({ user, enrolledCourses }: ProfileTabProps) {
         <div className="space-y-3">
           {[
             { label: "Enrolled Courses", value: `${enrolledCourses.length} courses` },
-            { label: "Study Streak",     value: "7 days 🔥" },
-            { label: "Topics Learned",   value: "24 📚" },
+            { label: "Study Streak",     value: `${user.current_streak} ${user.current_streak === 1 ? "day" : "days"} 🔥` },
+            { label: "Best Streak",      value: `${user.longest_streak} ${user.longest_streak === 1 ? "day" : "days"} 🏆` },
             { label: "Questions Asked",  value: "142 💬" },
             { label: "Score Average",    value: "88% ⭐" },
           ].map((row) => (

@@ -1,59 +1,47 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
+import { cookies } from "next/headers";
+
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
 export async function POST(request: Request) {
-  try {
-    const session = await auth();
+  const cookieStore = await cookies();
+  const token = cookieStore.get("lp_access_token")?.value;
 
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const {
-      firstName, lastName, city, state,
-      parentName, parentMobile, parentEmail,
-      grade, schoolBoard, courses,
-      favoriteSubject, studyFeeling, careerThoughts, strengthsInterest,
-    } = await request.json();
-
-    const user = await prisma.user.update({
-      where: { id: session.user.id },
-      data: {
-        firstName,
-        lastName,
-        city,
-        state,
-        parentName,
-        parentMobile,
-        parentEmail,
-        grade,
-        schoolBoard,
-        courses,
-        favoriteSubject,
-        studyFeeling,
-        careerThoughts,
-        strengthsInterest,
-        onboarded: true,
-      },
-    });
-
-    return NextResponse.json({
-      user: {
-        id: user.id,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        grade: user.grade,
-        schoolBoard: user.schoolBoard,
-        courses: user.courses,
-        onboarded: user.onboarded,
-      },
-    });
-  } catch (error) {
-    console.error("Onboarding error:", error);
-    return NextResponse.json(
-      { error: "Something went wrong" },
-      { status: 500 }
-    );
+  if (!token) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+
+  const body = await request.json();
+
+  // Map frontend camelCase → backend snake_case
+  const res = await fetch(`${BACKEND_URL}/api/v1/user/onboarding`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({
+      first_name: body.firstName,
+      last_name: body.lastName,
+      city: body.city,
+      state: body.state,
+      parent_name: body.parentName,
+      parent_mobile: body.parentMobile,
+      parent_email: body.parentEmail,
+      grade: body.grade,
+      school_board: body.schoolBoard,
+      courses: body.courses,
+      favorite_subject: body.favoriteSubject,
+      study_feeling: body.studyFeeling,
+      career_thoughts: body.careerThoughts,
+      strengths_interest: body.strengthsInterest,
+    }),
+  });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    return NextResponse.json(err, { status: res.status });
+  }
+
+  return NextResponse.json(await res.json());
 }

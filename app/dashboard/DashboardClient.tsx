@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { AnimatePresence } from "framer-motion";
-import type { Session } from "next-auth";
 import Navbar from "@/components/Navbar";
 import type { Tab } from "@/components/dashboard/types";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
@@ -11,19 +10,31 @@ import CoursesTab from "@/components/dashboard/tabs/CoursesTab";
 import ProgressTab from "@/components/dashboard/tabs/ProgressTab";
 import ProfileTab from "@/components/dashboard/tabs/ProfileTab";
 import AskTab from "@/components/dashboard/tabs/AskTab";
+import LockedChatScreen from "@/components/dashboard/tabs/LockedChatScreen";
+
+export type DashboardUser = {
+  id: string;
+  name: string | null;
+  email: string;
+  image: string | null;
+  is_onboarded: boolean;
+  is_active: boolean;
+  grade: string | null;
+  current_streak: number;
+  longest_streak: number;
+};
 
 interface DashboardClientProps {
-  session: Session;
+  user: DashboardUser;
   enrolledCourses: string[];
 }
 
-export default function DashboardClient({ session, enrolledCourses }: DashboardClientProps) {
+export default function DashboardClient({ user, enrolledCourses }: DashboardClientProps) {
   const [activeTab, setActiveTab] = useState<Tab>("courses");
-  const user = session.user;
 
   return (
     <div className="min-h-screen bg-white" style={{ fontFamily: "var(--font-nunito)" }}>
-      <Navbar />
+      <Navbar user={user} />
 
       <DashboardHeader user={user} enrolledCourses={enrolledCourses} />
 
@@ -39,10 +50,12 @@ export default function DashboardClient({ session, enrolledCourses }: DashboardC
             <MobileTabBar activeTab={activeTab} setActiveTab={setActiveTab} />
 
             <AnimatePresence mode="wait">
-              {activeTab === "courses"  && <CoursesTab enrolledCourses={enrolledCourses} key="courses"  />}
-              {activeTab === "progress" && <ProgressTab key="progress" />}
+              {activeTab === "courses"  && <CoursesTab enrolledCourses={enrolledCourses} key="courses" />}
+              {activeTab === "progress" && <ProgressTab currentStreak={user.current_streak} longestStreak={user.longest_streak} key="progress" />}
               {activeTab === "profile"  && <ProfileTab user={user} enrolledCourses={enrolledCourses} key="profile" />}
-              {activeTab === "ask"      && <AskTab key="ask" />}
+              {activeTab === "text"     && (user.is_active ? <AskTab key="text"  mode="text"  grade={user.grade} enrolledCourses={enrolledCourses} /> : <LockedChatScreen key="locked-text" />)}
+              {activeTab === "video"    && (user.is_active ? <AskTab key="video" mode="video" grade={user.grade} enrolledCourses={enrolledCourses} /> : <LockedChatScreen key="locked-video" />)}
+              {activeTab === "audio"    && (user.is_active ? <AskTab key="audio" mode="audio" grade={user.grade} enrolledCourses={enrolledCourses} /> : <LockedChatScreen key="locked-audio" />)}
             </AnimatePresence>
           </main>
         </div>

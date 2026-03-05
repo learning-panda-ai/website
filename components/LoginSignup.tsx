@@ -2,10 +2,12 @@
 
 import React, { useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { signIn } from "next-auth/react";
 import { Sparkles, Lightbulb, ShieldCheck, Mail, ArrowLeft, RefreshCw } from "lucide-react";
 import { Turnstile } from "@marsidev/react-turnstile";
 import type { TurnstileInstance } from "@marsidev/react-turnstile";
+import { useAuth } from "@/app/providers";
+
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
 const features = [
   { icon: "🎓", label: "Smart Learning" },
@@ -26,6 +28,7 @@ const floatingEmojis = [
 type AuthStep = "method" | "email-input" | "otp-input";
 
 export default function LoginSignup() {
+  const { refreshAuth } = useAuth();
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const [verifying, setVerifying] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -63,7 +66,7 @@ export default function LoginSignup() {
     try {
       const ok = await verifyTurnstile();
       if (!ok) { setError("Bot check failed. Please try again."); return; }
-      await signIn("google");
+      window.location.href = `${BACKEND_URL}/api/v1/auth/google`;
     } catch {
       setError("Something went wrong. Please try again.");
       turnstileRef.current?.reset();
@@ -78,19 +81,25 @@ export default function LoginSignup() {
     setSendingOtp(true);
     setError(null);
     try {
-      const ok = await verifyTurnstile();
-      if (!ok) { setError("Bot check failed. Please try again."); return; }
-
-      const res = await fetch("/api/auth/send-otp", {
+      // Send the token directly to the backend — it verifies server-side via Cloudflare.
+      // Do NOT call /api/verify-turnstile first: Turnstile tokens are single-use and
+      // consuming it here would cause the backend verification to fail with 401.
+      const res = await fetch(`${BACKEND_URL}/api/v1/auth/send-otp`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email, turnstile_token: turnstileToken }),
       });
       const data = await res.json();
       if (!res.ok) {
-        setError(data.error ?? "Failed to send OTP.");
+        // Token was rejected — reset widget so user can get a fresh one
+        turnstileRef.current?.reset();
+        setTurnstileToken(null);
+        setError(data.detail ?? "Failed to send OTP.");
         return;
       }
+      // Token consumed by backend — reset widget for any future actions
+      turnstileRef.current?.reset();
+      setTurnstileToken(null);
       setStep("otp-input");
       startResendCooldown();
     } catch {
@@ -115,13 +124,13 @@ export default function LoginSignup() {
     setSendingOtp(true);
     setError(null);
     try {
-      const res = await fetch("/api/auth/send-otp", {
+      const res = await fetch(`${BACKEND_URL}/api/v1/auth/send-otp`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),
       });
       const data = await res.json();
-      if (!res.ok) { setError(data.error ?? "Failed to resend OTP."); return; }
+      if (!res.ok) { setError(data.detail ?? "Failed to resend OTP."); return; }
       startResendCooldown();
     } catch {
       setError("Something went wrong. Please try again.");
@@ -135,12 +144,30 @@ export default function LoginSignup() {
     setSigningIn(true);
     setError(null);
     try {
-      const result = await signIn("otp", { email, otp, redirect: false });
-      if (result?.error) {
-        setError("Invalid or expired code. Please try again.");
+      const res = await fetch(`${BACKEND_URL}/api/v1/auth/verify-otp`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, otp_code: otp }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.detail ?? "Invalid or expired code. Please try again.");
         setOtp("");
+        return;
       }
-      // On success NextAuth will update the session; the page.tsx useEffect handles redirect
+
+      // Store session cookies via Next.js route
+      await fetch("/api/auth/set-session", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          access_token: data.access_token,
+          refresh_token: data.refresh_token,
+        }),
+      });
+
+      // Update auth context — login page will react to is_onboarded state
+      await refreshAuth();
     } catch {
       setError("Something went wrong. Please try again.");
     } finally {
@@ -366,21 +393,19 @@ export default function LoginSignup() {
                     <div className="h-px flex-1 bg-gray-100" />
                   </div>
 
-                  {/* Email OTP — temporarily disabled */}
-                  <div className="relative">
-                    <motion.button
-                      type="button"
-                      disabled
-                      className="flex w-full items-center justify-center gap-3 rounded-2xl border border-green-100 bg-green-50/50 px-4 py-3 text-base font-bold text-green-400 shadow-sm opacity-50 cursor-not-allowed"
-                      style={{ fontFamily: "var(--font-fredoka)" }}
-                    >
-                      <Mail className="h-5 w-5" />
-                      Sign in with Email
-                    </motion.button>
-                    <span className="absolute -top-2 right-3 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-bold text-amber-600 border border-amber-200">
-                      Coming soon
-                    </span>
-                  </div>
+                  {/* Email OTP */}
+                  <motion.button
+                    type="button"
+                    whileHover={turnstileToken ? { scale: 1.02, y: -2 } : {}}
+                    whileTap={turnstileToken ? { scale: 0.98 } : {}}
+                    onClick={() => { setError(null); setStep("email-input"); }}
+                    disabled={!turnstileToken}
+                    className="flex w-full items-center justify-center gap-3 rounded-2xl border border-green-200 bg-green-50 px-4 py-3 text-base font-bold text-green-700 shadow-sm hover:bg-green-100 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                    style={{ fontFamily: "var(--font-fredoka)" }}
+                  >
+                    <Mail className="h-5 w-5" />
+                    Sign in with Email
+                  </motion.button>
                 </div>
 
                 <motion.div

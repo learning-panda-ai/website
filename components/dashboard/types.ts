@@ -1,7 +1,7 @@
 import type { ElementType } from "react";
-import { BookOpen, BarChart2, MessageCircle, User } from "lucide-react";
+import { BookOpen, BarChart2, MessageSquare, User, Video, Mic } from "lucide-react";
 
-export type Tab = "courses" | "progress" | "profile" | "ask";
+export type Tab = "courses" | "progress" | "profile" | "text" | "video" | "audio";
 
 export const tabAnim = {
   initial:    { opacity: 0, y: 10  },
@@ -21,16 +21,24 @@ export const SIDEBAR_GROUPS: {
   {
     label: "MY ACCOUNT",
     items: [
-      { id: "progress", label: "Progress",  Icon: BarChart2     },
-      { id: "profile",  label: "Profile",   Icon: User          },
-      { id: "ask",      label: "Ask Panda", Icon: MessageCircle },
+      { id: "profile",  label: "Profile",  Icon: User      },
+      { id: "progress", label: "Progress", Icon: BarChart2 },
+    ],
+  },
+  {
+    label: "ASK PANDA",
+    items: [
+      { id: "text",  label: "Text Chat",  Icon: MessageSquare },
+      { id: "video", label: "Video Chat", Icon: Video         },
+      { id: "audio", label: "Voice Chat", Icon: Mic           },
     ],
   },
 ];
 
 export const MOBILE_TABS: { id: Tab; label: string; emoji: string }[] = [
-  { id: "courses",  label: "Courses",   emoji: "📚" },
-  { id: "progress", label: "Progress",  emoji: "📊" },
-  { id: "profile",  label: "Profile",   emoji: "👤" },
-  { id: "ask",      label: "Ask Panda", emoji: "🐼" },
+  { id: "courses",  label: "Courses",  emoji: "📚" },
+  { id: "progress", label: "Progress", emoji: "📊" },
+  { id: "profile",  label: "Profile",  emoji: "👤" },
+  { id: "text",     label: "Text",     emoji: "🐼" },
+  { id: "audio",    label: "Voice",    emoji: "🎤" },
 ];

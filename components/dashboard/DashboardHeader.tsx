@@ -1,9 +1,9 @@
 import Link from "next/link";
-import type { Session } from "next-auth";
 import { Star, Pencil } from "lucide-react";
+import type { DashboardUser } from "@/app/dashboard/DashboardClient";
 
 interface DashboardHeaderProps {
-  user: Session["user"];
+  user: DashboardUser;
   enrolledCourses: string[];
 }
 
@@ -19,12 +19,14 @@ export default function DashboardHeader({ user, enrolledCourses }: DashboardHead
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-11 flex items-center justify-between gap-4">
           <p className="text-sm font-semibold truncate">
-            🐼 Start leveling up and building your weekly streak!
+            {user.current_streak > 0
+              ? `🐼 ${user.current_streak} day streak — keep it going!`
+              : "🐼 Start leveling up and building your daily streak!"}
           </p>
           <div className="flex items-center gap-5 flex-shrink-0">
             <div className="flex items-center gap-1.5 text-sm font-bold">
-              🔥 <span>0</span>
-              <span className="font-normal text-green-100 hidden sm:inline">week streak</span>
+              🔥 <span>{user.current_streak}</span>
+              <span className="font-normal text-green-100 hidden sm:inline">day streak</span>
             </div>
             <div className="hidden sm:flex items-center gap-2 text-sm">
               <span className="font-bold">Level 1</span>
@@ -61,7 +63,7 @@ export default function DashboardHeader({ user, enrolledCourses }: DashboardHead
                 </span>
               )}
               <span className="text-xs font-bold bg-orange-50 text-orange-600 border border-orange-100 px-3 py-1 rounded-full">
-                🔥 7 streak
+                🔥 {user.current_streak} {user.current_streak === 1 ? "day" : "days"}
               </span>
               <span className="text-xs font-bold bg-amber-50 text-amber-600 border border-amber-100 px-3 py-1 rounded-full">
                 <Star className="h-3 w-3 inline mr-0.5" />88% avg

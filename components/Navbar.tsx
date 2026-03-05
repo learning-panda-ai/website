@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ArrowRight, LayoutDashboard, Bell, Settings, LogOut } from "lucide-react";
-import { useSession, signOut } from "next-auth/react";
+import { useAuth } from "@/app/providers";
+import type { AuthUser } from "@/types/auth";
 
 const navLinks = [
   { label: "How It Works", href: "#how-it-works" },
@@ -12,12 +13,18 @@ const navLinks = [
   { label: "Testimonials", href: "#testimonials" },
 ];
 
-export default function Navbar() {
-  const { data: session } = useSession();
+interface NavbarProps {
+  user?: AuthUser | null;
+}
+
+export default function Navbar({ user: propsUser }: NavbarProps = {}) {
+  const authContext = useAuth();
+  const user = propsUser ?? authContext.user;
+  const logout = authContext.logout;
   const pathname = usePathname();
-  const isLoggedIn = !!session?.user;
+  const isLoggedIn = !!user;
   const isDashboard = pathname?.startsWith("/dashboard");
-  const firstName = session?.user?.name?.split(" ")[0] ?? "User";
+  const firstName = user?.name?.split(" ")[0] ?? "User";
 
   return (
     <header className="sticky top-0 z-50 bg-white border-b border-gray-100 shadow-sm">
@@ -50,11 +57,11 @@ export default function Navbar() {
                 {firstName[0]}
               </div>
               <span className="text-sm font-semibold text-gray-700 hidden sm:block">
-                {session?.user?.name}
+                {user?.name}
               </span>
             </div>
             <button
-              onClick={() => signOut({ callbackUrl: "/" })}
+              onClick={logout}
               className="flex items-center gap-1.5 text-xs font-bold text-gray-400 hover:text-red-500 transition-colors"
             >
               <LogOut className="h-4 w-4" />

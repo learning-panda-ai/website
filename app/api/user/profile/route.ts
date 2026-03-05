@@ -1,35 +1,43 @@
-import { auth } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
+import { cookies } from "next/headers";
+
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
 export async function PATCH(req: Request) {
-  const session = await auth();
-  if (!session?.user?.id) {
+  const cookieStore = await cookies();
+  const token = cookieStore.get("lp_access_token")?.value;
+
+  if (!token) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   const body = await req.json();
-  const { firstName, lastName, city, state, grade, parentName, parentMobile, parentEmail } = body;
 
-  await prisma.user.update({
-    where: { id: session.user.id },
-    data: {
-      firstName:    firstName    || null,
-      lastName:     lastName     || null,
-      city:         city         || null,
-      state:        state        || null,
-      grade:        grade        || null,
-      parentName:   parentName   || null,
-      parentMobile: parentMobile || null,
-      parentEmail:  parentEmail  || null,
-      // Keep the display name in sync
-      ...(firstName && lastName
-        ? { name: `${firstName} ${lastName}` }
-        : firstName
-        ? { name: firstName }
-        : {}),
+  // Map frontend camelCase → backend snake_case
+  const res = await fetch(`${BACKEND_URL}/api/v1/user/profile`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
     },
+    body: JSON.stringify({
+      first_name: body.firstName ?? null,
+      last_name: body.lastName ?? null,
+      city: body.city ?? null,
+      state: body.state ?? null,
+      grade: body.grade ?? null,
+      school_board: body.schoolBoard ?? null,
+      parent_name: body.parentName ?? null,
+      parent_mobile: body.parentMobile ?? null,
+      parent_email: body.parentEmail ?? null,
+      courses: body.courses ?? null,
+    }),
   });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    return NextResponse.json(err, { status: res.status });
+  }
 
   return NextResponse.json({ success: true });
 }

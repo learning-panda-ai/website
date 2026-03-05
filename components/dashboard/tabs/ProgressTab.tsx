@@ -10,14 +10,19 @@ const PROGRESS_BARS = [
   { subject: "Computing",   emoji: "💻", pct: 40, color: "bg-cyan-500"   },
 ];
 
-const STATS = [
-  { label: "Study Streak",    value: "7 days", icon: "🔥", bg: "bg-orange-50", text: "text-orange-600" },
-  { label: "Topics Learned",  value: "24",     icon: "📚", bg: "bg-blue-50",   text: "text-blue-600"   },
-  { label: "Questions Asked", value: "142",    icon: "💬", bg: "bg-purple-50", text: "text-purple-600" },
-  { label: "Score Average",   value: "88%",    icon: "⭐", bg: "bg-amber-50",  text: "text-amber-600"  },
-];
+interface ProgressTabProps {
+  currentStreak: number;
+  longestStreak: number;
+}
 
-export default function ProgressTab() {
+export default function ProgressTab({ currentStreak, longestStreak }: ProgressTabProps) {
+  const STATS = [
+    { label: "Study Streak",    value: `${currentStreak} ${currentStreak === 1 ? "day" : "days"}`, icon: "🔥", bg: "bg-orange-50", text: "text-orange-600" },
+    { label: "Best Streak",     value: `${longestStreak} ${longestStreak === 1 ? "day" : "days"}`, icon: "🏆", bg: "bg-blue-50",   text: "text-blue-600"   },
+    { label: "Questions Asked", value: "142",    icon: "💬", bg: "bg-purple-50", text: "text-purple-600" },
+    { label: "Score Average",   value: "88%",    icon: "⭐", bg: "bg-amber-50",  text: "text-amber-600"  },
+  ];
+
   return (
     <motion.div key="progress" {...tabAnim} className="space-y-6">
       <h2 className="text-2xl font-extrabold text-gray-800" style={{ fontFamily: "var(--font-fredoka)" }}>

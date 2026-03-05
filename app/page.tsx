@@ -3,7 +3,7 @@
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { ArrowRight, Star, Check, LayoutDashboard } from "lucide-react";
-import { useSession } from "next-auth/react";
+import { useAuth } from "@/app/providers";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
@@ -281,8 +281,8 @@ const faqSchema = {
 };
 
 export default function LandingPage() {
-  const { data: session } = useSession();
-  const isLoggedIn = !!session?.user;
+  const { user } = useAuth();
+  const isLoggedIn = !!user;
 
   return (
     <div className="min-h-screen bg-white" style={{ fontFamily: "var(--font-nunito)" }}>
