@@ -1,6 +1,6 @@
 import { MetadataRoute } from "next";
 
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://learningpanda.ai";
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL as string;
 
 export default function sitemap(): MetadataRoute.Sitemap {
   return [

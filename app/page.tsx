@@ -113,7 +113,7 @@ const testimonials = [
   },
 ];
 
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://learningpanda.ai";
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
 
 const websiteSchema = {
   "@context": "https://schema.org",

@@ -22,10 +22,10 @@ const geistMono = Geist_Mono({
 });
 
 
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://learningpanda.ai";
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
 
 export const metadata: Metadata = {
-  metadataBase: new URL(BASE_URL),
+  metadataBase: new URL(BASE_URL!),
 
   title: {
     template: "%s | Learning Panda",

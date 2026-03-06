@@ -42,7 +42,7 @@ export default function LoginSignup() {
   const [signingIn, setSigningIn] = useState(false);
   const [resendCooldown, setResendCooldown] = useState(0);
 
-  const siteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? "";
+  const siteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
 
   async function verifyTurnstile(): Promise<boolean> {
     if (!turnstileToken) return false;
@@ -393,19 +393,22 @@ export default function LoginSignup() {
                     <div className="h-px flex-1 bg-gray-100" />
                   </div>
 
-                  {/* Email OTP */}
-                  <motion.button
-                    type="button"
-                    whileHover={turnstileToken ? { scale: 1.02, y: -2 } : {}}
-                    whileTap={turnstileToken ? { scale: 0.98 } : {}}
-                    onClick={() => { setError(null); setStep("email-input"); }}
-                    disabled={!turnstileToken}
-                    className="flex w-full items-center justify-center gap-3 rounded-2xl border border-green-200 bg-green-50 px-4 py-3 text-base font-bold text-green-700 shadow-sm hover:bg-green-100 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-                    style={{ fontFamily: "var(--font-fredoka)" }}
-                  >
-                    <Mail className="h-5 w-5" />
-                    Sign in with Email
-                  </motion.button>
+                  {/* Email OTP - temporarily disabled */}
+                  <div className="flex flex-col items-center gap-1">
+                    <motion.button
+                      type="button"
+                      whileHover={turnstileToken ? { scale: 1.02, y: -2 } : {}}
+                      whileTap={turnstileToken ? { scale: 0.98 } : {}}
+                      onClick={() => { setError(null); setStep("email-input"); }}
+                      disabled={true /* temporarily disabled */}
+                      className="flex w-full items-center justify-center gap-3 rounded-2xl border border-green-200 bg-green-50 px-4 py-3 text-base font-bold text-green-700 shadow-sm hover:bg-green-100 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                      style={{ fontFamily: "var(--font-fredoka)" }}
+                    >
+                      <Mail className="h-5 w-5" />
+                      Sign in with Email
+                    </motion.button>
+                    <p className="text-xs text-amber-500 font-medium">Temporarily unavailable</p>
+                  </div>
                 </div>
 
                 <motion.div

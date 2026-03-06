@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
-const FRONTEND_URL = process.env.NEXT_PUBLIC_FRONTEND_URL ?? "http://localhost:3000";
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
 
 /**
  * Returns false only when Origin is present AND does not match the frontend host.
@@ -12,7 +12,7 @@ function isForeignOrigin(origin: string | null): boolean {
   if (!origin) return false; // same-origin — allow
   try {
     const url = new URL(origin);
-    const allowed = new URL(FRONTEND_URL);
+    const allowed = new URL(BASE_URL!);
     return url.hostname !== allowed.hostname;
   } catch {
     return true; // malformed origin — block
