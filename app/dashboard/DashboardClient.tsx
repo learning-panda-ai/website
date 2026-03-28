@@ -11,6 +11,7 @@ import ProgressTab from "@/components/dashboard/tabs/ProgressTab";
 import ProfileTab from "@/components/dashboard/tabs/ProfileTab";
 import AskTab from "@/components/dashboard/tabs/AskTab";
 import LockedChatScreen from "@/components/dashboard/tabs/LockedChatScreen";
+import ComingSoonTab from "@/components/dashboard/tabs/ComingSoonTab";
 
 export type DashboardUser = {
   id: string;
@@ -27,9 +28,12 @@ export type DashboardUser = {
 interface DashboardClientProps {
   user: DashboardUser;
   enrolledCourses: string[];
+  questionsAsked: number;
+  weekActivity: boolean[];
+  todayIndex: number; // 0=Mon … 6=Sun
 }
 
-export default function DashboardClient({ user, enrolledCourses }: DashboardClientProps) {
+export default function DashboardClient({ user, enrolledCourses, questionsAsked, weekActivity, todayIndex }: DashboardClientProps) {
   const [activeTab, setActiveTab] = useState<Tab>("courses");
 
   return (
@@ -51,11 +55,13 @@ export default function DashboardClient({ user, enrolledCourses }: DashboardClie
 
             <AnimatePresence mode="wait">
               {activeTab === "courses"  && <CoursesTab enrolledCourses={enrolledCourses} key="courses" />}
-              {activeTab === "progress" && <ProgressTab currentStreak={user.current_streak} longestStreak={user.longest_streak} key="progress" />}
-              {activeTab === "profile"  && <ProfileTab user={user} enrolledCourses={enrolledCourses} key="profile" />}
+              {activeTab === "progress" && <ProgressTab currentStreak={user.current_streak} longestStreak={user.longest_streak} questionsAsked={questionsAsked} weekActivity={weekActivity} todayIndex={todayIndex} key="progress" />}
+              {activeTab === "profile"  && <ProfileTab user={user} enrolledCourses={enrolledCourses} questionsAsked={questionsAsked} key="profile" />}
               {activeTab === "text"     && (user.is_active ? <AskTab key="text"  mode="text"  grade={user.grade} enrolledCourses={enrolledCourses} /> : <LockedChatScreen key="locked-text" />)}
               {activeTab === "video"    && (user.is_active ? <AskTab key="video" mode="video" grade={user.grade} enrolledCourses={enrolledCourses} /> : <LockedChatScreen key="locked-video" />)}
-              {activeTab === "audio"    && (user.is_active ? <AskTab key="audio" mode="audio" grade={user.grade} enrolledCourses={enrolledCourses} /> : <LockedChatScreen key="locked-audio" />)}
+              {activeTab === "audio"       && (user.is_active ? <AskTab key="audio" mode="audio" grade={user.grade} enrolledCourses={enrolledCourses} /> : <LockedChatScreen key="locked-audio" />)}
+              {activeTab === "quizzes"     && <ComingSoonTab key="quizzes"     label="Quizzes"     emoji="🎮" description="Test your knowledge with fun quizzes tailored to your courses and grade." />}
+              {activeTab === "challenges"  && <ComingSoonTab key="challenges"  label="Challenges"  emoji="⚡" description="Take on daily and weekly challenges to earn bonus points and rewards." />}
             </AnimatePresence>
           </main>
         </div>

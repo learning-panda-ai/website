@@ -1,7 +1,7 @@
 import type { ElementType } from "react";
-import { BookOpen, BarChart2, MessageSquare, User, Video, Mic } from "lucide-react";
+import { BookOpen, BarChart2, MessageSquare, User, Video, Mic, Gamepad2, Zap } from "lucide-react";
 
-export type Tab = "courses" | "progress" | "profile" | "text" | "video" | "audio";
+export type Tab = "courses" | "progress" | "profile" | "text" | "video" | "audio" | "quizzes" | "challenges";
 
 export const tabAnim = {
   initial:    { opacity: 0, y: 10  },
@@ -31,6 +31,13 @@ export const SIDEBAR_GROUPS: {
       { id: "text",  label: "Text Chat",  Icon: MessageSquare },
       { id: "video", label: "Video Chat", Icon: Video         },
       { id: "audio", label: "Voice Chat", Icon: Mic           },
+    ],
+  },
+  {
+    label: "GAMIFY",
+    items: [
+      { id: "quizzes",    label: "Quizzes",    Icon: Gamepad2 },
+      { id: "challenges", label: "Challenges", Icon: Zap      },
     ],
   },
 ];

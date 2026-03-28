@@ -9,6 +9,8 @@ interface NavProps {
   enrolledCourses: string[];
 }
 
+const GAMIFY_IDS = new Set(["quizzes", "challenges"]);
+
 export function DesktopSidebar({ activeTab, setActiveTab, enrolledCourses }: NavProps) {
   return (
     <aside className="hidden lg:block w-52 shrink-0 sticky top-24">
@@ -42,6 +44,11 @@ export function DesktopSidebar({ activeTab, setActiveTab, enrolledCourses }: Nav
                   {id === "courses" && enrolledCourses.length > 0 && (
                     <span className="ml-auto text-xs bg-green-100 text-green-700 font-bold px-2 py-0.5 rounded-full">
                       {enrolledCourses.length}
+                    </span>
+                  )}
+                  {GAMIFY_IDS.has(id) && (
+                    <span className="ml-auto text-[9px] bg-amber-100 text-amber-600 font-bold px-1.5 py-0.5 rounded-full tracking-wide">
+                      SOON
                     </span>
                   )}
                 </button>

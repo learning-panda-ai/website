@@ -9,9 +9,10 @@ import type { DashboardUser } from "@/app/dashboard/DashboardClient";
 interface ProfileTabProps {
   user: DashboardUser;
   enrolledCourses: string[];
+  questionsAsked: number;
 }
 
-export default function ProfileTab({ user, enrolledCourses }: ProfileTabProps) {
+export default function ProfileTab({ user, enrolledCourses, questionsAsked }: ProfileTabProps) {
   const firstName = user?.name?.split(" ")[0] ?? "Learner";
 
   return (
@@ -52,8 +53,7 @@ export default function ProfileTab({ user, enrolledCourses }: ProfileTabProps) {
             { label: "Enrolled Courses", value: `${enrolledCourses.length} courses` },
             { label: "Study Streak",     value: `${user.current_streak} ${user.current_streak === 1 ? "day" : "days"} 🔥` },
             { label: "Best Streak",      value: `${user.longest_streak} ${user.longest_streak === 1 ? "day" : "days"} 🏆` },
-            { label: "Questions Asked",  value: "142 💬" },
-            { label: "Score Average",    value: "88% ⭐" },
+            { label: "Questions Asked",  value: `${questionsAsked} 💬` },
           ].map((row) => (
             <div
               key={row.label}

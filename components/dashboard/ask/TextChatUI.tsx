@@ -160,6 +160,7 @@ export default function TextChatUI({
               });
             } else if (data.type === "done" || data.type === "error") {
               if (data.type === "error") {
+                console.error("[Panda chat error]", data.content);
                 assistantText = "";
                 setMessages((prev) => {
                   const updated = [...prev];

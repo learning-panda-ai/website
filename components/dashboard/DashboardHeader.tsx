@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Star, Pencil } from "lucide-react";
+import { Pencil } from "lucide-react";
 import type { DashboardUser } from "@/app/dashboard/DashboardClient";
 
 interface DashboardHeaderProps {
@@ -64,9 +64,6 @@ export default function DashboardHeader({ user, enrolledCourses }: DashboardHead
               )}
               <span className="text-xs font-bold bg-orange-50 text-orange-600 border border-orange-100 px-3 py-1 rounded-full">
                 🔥 {user.current_streak} {user.current_streak === 1 ? "day" : "days"}
-              </span>
-              <span className="text-xs font-bold bg-amber-50 text-amber-600 border border-amber-100 px-3 py-1 rounded-full">
-                <Star className="h-3 w-3 inline mr-0.5" />88% avg
               </span>
             </div>
             <Link
