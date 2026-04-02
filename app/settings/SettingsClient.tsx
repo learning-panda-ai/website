@@ -55,37 +55,28 @@ const TABS: { id: Tab; label: string; Icon: React.ElementType; emoji: string }[]
 
 const COURSE_CATEGORIES = [
   {
-    label: "Math 🔢",
-    courses: [
-      "Algebra 1", "Algebra 2", "Geometry", "Trigonometry",
-      "Statistics & Probability", "Linear Algebra", "Calculus",
-      "Pre-Calculus", "Arithmetic",
-    ],
+    label: "Mathematics 🔢",
+    courses: ["Mathematics"],
   },
   {
     label: "Science 🧪",
-    courses: [
-      "Physics", "Chemistry", "Biology",
-      "Environmental Science", "Earth Science", "Anatomy & Physiology",
-    ],
+    courses: ["Science", "Physics", "Chemistry", "Biology"],
+  },
+  {
+    label: "Social Studies 🗺️",
+    courses: ["Social Science", "History", "Geography", "Economics", "Political Science"],
+  },
+  {
+    label: "Languages 📝",
+    courses: ["English", "Hindi", "English Literature", "English Grammar"],
   },
   {
     label: "Computing 💻",
-    courses: [
-      "Computer Science", "Programming (Python)", "Web Development",
-      "Data Structures", "Algorithms", "AI & Machine Learning",
-    ],
+    courses: ["Computer Science", "Information Technology"],
   },
   {
-    label: "Languages 🌍",
-    courses: [
-      "English Grammar", "English Literature", "Hindi",
-      "Spanish", "French", "Reading & Writing",
-    ],
-  },
-  {
-    label: "Arts & More 🎨",
-    courses: ["Art History", "Music Theory", "Design", "Health & Fitness"],
+    label: "Commerce & More 📈",
+    courses: ["Accountancy", "Business Studies", "Physical Education", "Fine Arts"],
   },
 ];
 
@@ -671,13 +662,6 @@ function BillingTab() {
 
 // ── TAB: Usage ────────────────────────────────────────────────────────────
 
-const USAGE_STATS = [
-  { label: "Study Streak",    value: "7 days", icon: "🔥", bg: "bg-orange-50", text: "text-orange-600" },
-  { label: "Topics Learned",  value: "24",     icon: "📚", bg: "bg-blue-50",   text: "text-blue-600"   },
-  { label: "Questions Asked", value: "142",    icon: "💬", bg: "bg-purple-50", text: "text-purple-600" },
-  { label: "Score Average",   value: "88%",    icon: "⭐", bg: "bg-amber-50",  text: "text-amber-600"  },
-];
-
 function aiTutorLabel(id: string | null) {
   switch (id) {
     case "text":  return "📝 Text — Read & Learn";
@@ -698,29 +682,7 @@ function UsageTab({ user }: { user: UserProp }) {
   return (
     <motion.div key="usage" {...tabAnim} className="space-y-6">
       <SectionCard>
-        <SectionTitle>Learning Stats</SectionTitle>
-        <div className="grid grid-cols-2 gap-4">
-          {USAGE_STATS.map((s) => (
-            <div
-              key={s.label}
-              className={`${s.bg} rounded-xl p-4 flex items-center gap-3`}
-            >
-              <span className="text-2xl">{s.icon}</span>
-              <div>
-                <p
-                  className={`font-extrabold ${s.text}`}
-                  style={{ fontFamily: "var(--font-fredoka)" }}
-                >
-                  {s.value}
-                </p>
-                <p className="text-xs text-gray-500">{s.label}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </SectionCard>
-
-      <SectionCard>
+        <SectionTitle>Learning Overview</SectionTitle>
         <SubTitle>Learning Preferences</SubTitle>
         <div className="space-y-3">
           {[

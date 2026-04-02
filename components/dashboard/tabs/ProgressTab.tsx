@@ -13,11 +13,12 @@ interface ProgressTabProps {
 }
 
 export default function ProgressTab({ currentStreak, longestStreak, questionsAsked, weekActivity, todayIndex }: ProgressTabProps) {
+  const activeThisWeek = weekActivity.filter(Boolean).length;
   const STATS = [
     { label: "Study Streak",    value: `${currentStreak} ${currentStreak === 1 ? "day" : "days"}`, icon: "🔥", bg: "bg-orange-50", text: "text-orange-600" },
     { label: "Best Streak",     value: `${longestStreak} ${longestStreak === 1 ? "day" : "days"}`, icon: "🏆", bg: "bg-blue-50",   text: "text-blue-600"   },
     { label: "Questions Asked", value: `${questionsAsked}`,                                         icon: "💬", bg: "bg-purple-50", text: "text-purple-600" },
-    { label: "Score Average",   value: "88%",                                                        icon: "⭐", bg: "bg-amber-50",  text: "text-amber-600"  },
+    { label: "Active This Week", value: `${activeThisWeek} / 7 days`,                               icon: "📅", bg: "bg-green-50",  text: "text-green-600"  },
   ];
 
   return (

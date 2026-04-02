@@ -9,8 +9,8 @@ import type { AuthUser } from "@/types/auth";
 const navLinks = [
   { label: "How It Works", href: "#how-it-works" },
   { label: "Features", href: "#features" },
-  { label: "Subjects", href: "#subjects" },
-  { label: "Testimonials", href: "#testimonials" },
+  { label: "For Schools", href: "#for-schools" },
+  { label: "Pricing", href: "#pricing" },
 ];
 
 interface NavbarProps {
