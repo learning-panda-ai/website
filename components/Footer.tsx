@@ -11,14 +11,14 @@ const footerLinks = {
     { label: "Study Guides", href: "#" },
   ],
   Company: [
-    { label: "About Us", href: "#" },
+    { label: "About Us", href: "/about" },
     { label: "Contact", href: "mailto:hello@learningpanda.ai" },
     { label: "School Partnerships", href: "mailto:schools@learningpanda.ai" },
   ],
   Legal: [
-    { label: "Privacy Policy", href: "#" },
-    { label: "Terms of Service", href: "#" },
-    { label: "Child Safety Policy", href: "#" },
+    { label: "Privacy Policy", href: "/privacy-policy" },
+    { label: "Terms of Service", href: "/terms-of-service" },
+    { label: "Child Safety Policy", href: "/child-safety" },
   ],
 };
 
