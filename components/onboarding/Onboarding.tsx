@@ -1,16 +1,9 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import {
   Rocket,
-  Sparkles,
-  Calculator,
-  FlaskConical,
-  BookOpen,
-  Globe,
-  Code,
-  Palette,
   Loader2,
   CheckCircle2,
   School,
@@ -19,86 +12,28 @@ import BasicDetails, { type BasicDetailsData } from "@/components/onboarding/Bas
 
 /* ═══════════════════ DATA ═══════════════════ */
 
-const grades = [
-  { id: "class-1",  label: "Class 1",  emoji: "🌱", enabled: false },
-  { id: "class-2",  label: "Class 2",  emoji: "🌿", enabled: false },
-  { id: "class-3",  label: "Class 3",  emoji: "🍀", enabled: false },
-  { id: "class-4",  label: "Class 4",  emoji: "🌻", enabled: false },
-  { id: "class-5",  label: "Class 5",  emoji: "⭐", enabled: false },
-  { id: "class-6",  label: "Class 6",  emoji: "🌟", enabled: false },
-  { id: "class-7",  label: "Class 7",  emoji: "🔥", enabled: false },
-  { id: "class-8",  label: "Class 8",  emoji: "💫", enabled: true  },
-  { id: "class-9",  label: "Class 9",  emoji: "🚀", enabled: true  },
-  { id: "class-10", label: "Class 10", emoji: "🏆", enabled: true  },
-  { id: "class-11", label: "Class 11", emoji: "💎", enabled: false },
-  { id: "class-12", label: "Class 12", emoji: "👑", enabled: false },
-];
-
-const schoolBoards = ["CBSE", "ICSE", "State Board", "Other"];
-
-const courseCategories = [
-  {
-    id: "math",
-    label: "Math",
-    emoji: "🔢",
-    icon: Calculator,
-    accent: "blue",
-    courses: [
-      "Algebra 1", "Algebra 2", "Geometry", "Trigonometry",
-      "Statistics & Probability", "Linear Algebra", "Calculus",
-      "Pre-Calculus", "Arithmetic",
-    ],
-  },
-  {
-    id: "science",
-    label: "Science",
-    emoji: "🧪",
-    icon: FlaskConical,
-    accent: "green",
-    courses: [
-      "Physics", "Chemistry", "Biology",
-      "Environmental Science", "Earth Science", "Anatomy & Physiology",
-    ],
-  },
-  {
-    id: "computing",
-    label: "Computing",
-    emoji: "💻",
-    icon: Code,
-    accent: "emerald",
-    courses: [
-      "Computer Science", "Programming (Python)", "Web Development",
-      "Data Structures", "Algorithms", "AI & Machine Learning",
-    ],
-  },
-  {
-    id: "languages",
-    label: "Languages",
-    emoji: "🌍",
-    icon: Globe,
-    accent: "amber",
-    courses: [
-      "English Grammar", "English Literature", "Hindi",
-      "Spanish", "French", "Reading & Writing",
-    ],
-  },
-  {
-    id: "arts",
-    label: "Arts & More",
-    emoji: "🎨",
-    icon: Palette,
-    accent: "pink",
-    courses: ["Art History", "Music Theory", "Design", "Health & Fitness"],
-  },
-];
-
-const accentMap: Record<string, { bg: string; border: string; text: string; check: string }> = {
-  blue:    { bg: "bg-blue-50",    border: "border-blue-400",    text: "text-blue-700",    check: "bg-blue-500 border-blue-500" },
-  green:   { bg: "bg-green-50",   border: "border-green-400",   text: "text-green-700",   check: "bg-green-500 border-green-500" },
-  emerald: { bg: "bg-emerald-50", border: "border-emerald-400", text: "text-emerald-700", check: "bg-emerald-500 border-emerald-500" },
-  amber:   { bg: "bg-amber-50",   border: "border-amber-400",   text: "text-amber-700",   check: "bg-amber-500 border-amber-500" },
-  pink:    { bg: "bg-pink-50",    border: "border-pink-400",    text: "text-pink-700",    check: "bg-pink-500 border-pink-500" },
+const CLASS_EMOJI: Record<string, string> = {
+  "Class 1": "🌱", "Class 2": "🌿", "Class 3": "🍀", "Class 4": "🌻",
+  "Class 5": "⭐", "Class 6": "🌟", "Class 7": "🔥", "Class 8": "💫",
+  "Class 9": "🚀", "Class 10": "🏆", "Class 11": "💎", "Class 12": "👑",
 };
+
+const SUBJECT_EMOJI: Record<string, string> = {
+  Mathematics: "📐", Physics: "⚛️", Chemistry: "🧪", Biology: "🧬",
+  Science: "🔬", "Computer Science": "💻", English: "📖", Hindi: "🇮🇳",
+  "Social Science": "🌍", History: "📜", Geography: "🗺️", Economics: "💰",
+  "English Grammar": "✍️", "English Literature": "📚", Sanskrit: "🕉️",
+};
+
+// "Class 10" → "class-10" for backend storage
+function classLabelToId(label: string): string {
+  return label.toLowerCase().replace(" ", "-");
+}
+
+interface OnboardingOptions {
+  classes: string[];
+  subjects_by_class: Record<string, string[]>;
+}
 
 // Step 3 – About You questions
 const favoriteSubjects = [
@@ -137,7 +72,7 @@ interface OnboardingProps {
 }
 
 export default function Onboarding({ onComplete }: OnboardingProps) {
-  // step 0: basic details | 1: grade + board | 2: courses | 3: about you
+  // step 0: basic details | 1: grade | 2: subjects | 3: about you
   const [step, setStep] = useState(0);
   const [basicDetails, setBasicDetails] = useState<BasicDetailsData>({
     firstName: "",
@@ -148,8 +83,10 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
     parentMobile: "",
     parentEmail: "",
   });
+  const [options, setOptions] = useState<OnboardingOptions>({ classes: [], subjects_by_class: {} });
+  const [optionsLoading, setOptionsLoading] = useState(true);
+  // selectedGrade stores the API label e.g. "Class 10"; converted to "class-10" on submit
   const [selectedGrade, setSelectedGrade] = useState<string | null>(null);
-  const [selectedBoard, setSelectedBoard] = useState<string | null>(null);
   const [selectedCourses, setSelectedCourses] = useState<string[]>([]);
   const [favoriteSubject, setFavoriteSubject] = useState<string | null>(null);
   const [studyFeeling, setStudyFeeling] = useState<string | null>(null);
@@ -157,10 +94,25 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
   const [strengthsInterest, setStrengthsInterest] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
+  useEffect(() => {
+    fetch("/api/user/onboarding-options")
+      .then((r) => (r.ok ? r.json() : { classes: [], subjects_by_class: {} }))
+      .then((data: OnboardingOptions) => setOptions(data))
+      .catch(() => setOptions({ classes: [], subjects_by_class: {} }))
+      .finally(() => setOptionsLoading(false));
+  }, []);
+
+  const availableSubjects = selectedGrade ? (options.subjects_by_class[selectedGrade] ?? []) : [];
+
   const toggleCourse = (c: string) =>
     setSelectedCourses((prev) =>
       prev.includes(c) ? prev.filter((x) => x !== c) : [...prev, c]
     );
+
+  const selectGrade = (label: string) => {
+    setSelectedGrade(label);
+    setSelectedCourses([]); // reset subjects when grade changes
+  };
 
   const isBasicDetailsComplete = () => {
     const d = basicDetails;
@@ -180,7 +132,7 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
 
   const canContinue = () => {
     if (step === 0) return isBasicDetailsComplete();
-    if (step === 1) return selectedGrade !== null && selectedBoard !== null;
+    if (step === 1) return selectedGrade !== null;
     if (step === 2) return selectedCourses.length >= 1;
     if (step === 3) return isAboutYouComplete();
     return false;
@@ -195,8 +147,7 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...basicDetails,
-          grade: selectedGrade,
-          schoolBoard: selectedBoard,
+          grade: selectedGrade ? classLabelToId(selectedGrade) : selectedGrade,
           courses: selectedCourses,
           favoriteSubject,
           studyFeeling,
@@ -223,7 +174,7 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
 
   const progressSteps = [
     { label: "Details",  done: isBasicDetailsComplete() },
-    { label: "Grade",    done: selectedGrade !== null && selectedBoard !== null },
+    { label: "Grade",    done: selectedGrade !== null },
     { label: "Courses",  done: selectedCourses.length >= 1 },
     { label: "About You", done: isAboutYouComplete() },
   ];
@@ -321,7 +272,7 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
               transition={{ duration: 0.4 }}
               className="rounded-4xl border-2 border-green-200 bg-white/80 p-6 shadow-lg shadow-green-100/40 backdrop-blur-sm sm:p-8"
             >
-              {/* Grade */}
+              {/* Grade header */}
               <div className="mb-6 flex items-center gap-3">
                 <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-green-100 text-lg">🎒</span>
                 <div>
@@ -330,88 +281,58 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
                   </h2>
                   <p className="text-xs text-green-500 font-medium">Pick one so we match your level ✨</p>
                 </div>
-                {selectedGrade && selectedBoard && (
+                {selectedGrade && (
                   <motion.span initial={{ scale: 0 }} animate={{ scale: 1 }} className="ml-auto flex h-7 w-7 items-center justify-center rounded-full bg-green-500">
                     <CheckCircle2 className="h-4 w-4 text-white" />
                   </motion.span>
                 )}
               </div>
 
-              {/* Grade grid */}
+              {/* Grade grid — only classes with ingested content */}
               <div className="mb-3 flex items-center gap-2">
                 <School className="h-4 w-4 text-green-600" />
-                <span className="text-xs font-bold uppercase tracking-wider text-green-600" style={{ fontFamily: "var(--font-fredoka)" }}>School</span>
+                <span className="text-xs font-bold uppercase tracking-wider text-green-600" style={{ fontFamily: "var(--font-fredoka)" }}>Available Classes</span>
               </div>
-              <div className="grid grid-cols-4 gap-2 sm:grid-cols-6 mb-8">
-                {grades.map((g) => {
-                  const sel = selectedGrade === g.id;
-                  if (g.enabled) {
+
+              {optionsLoading ? (
+                <div className="flex items-center justify-center py-12 gap-2 text-green-600">
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                  <span className="text-sm font-medium">Loading classes…</span>
+                </div>
+              ) : options.classes.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-12 text-center gap-2">
+                  <span className="text-4xl">🏫</span>
+                  <p className="text-sm font-bold text-gray-500">No classes available yet</p>
+                  <p className="text-xs text-gray-400">Content is being added. Check back soon!</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                  {options.classes.map((label) => {
+                    const sel = selectedGrade === label;
                     return (
                       <motion.button
-                        key={g.id}
-                        whileHover={{ scale: 1.07, y: -3 }}
+                        key={label}
+                        whileHover={{ scale: 1.05, y: -2 }}
                         whileTap={{ scale: 0.95 }}
-                        onClick={() => setSelectedGrade(g.id)}
-                        className={`col-span-2 flex flex-col items-center gap-1 rounded-2xl border-2 px-2 py-3 text-center transition-all ${
+                        onClick={() => selectGrade(label)}
+                        className={`flex flex-col items-center gap-1.5 rounded-2xl border-2 px-3 py-4 text-center transition-all ${
                           sel
                             ? "border-green-400 bg-green-50 shadow-md shadow-green-200/50"
                             : "border-green-100 bg-white hover:border-green-300 hover:bg-green-50/50"
                         }`}
                       >
-                        <span className="text-xl">{g.emoji}</span>
-                        <span className={`text-xs font-bold ${sel ? "text-green-700" : "text-green-600"}`}>{g.label}</span>
-                      </motion.button>
-                    );
-                  }
-                  // Disabled grades
-                  return (
-                    <div
-                      key={g.id}
-                      className="flex flex-col items-center gap-1 rounded-2xl border-2 border-green-50 bg-gray-50 px-2 py-3 text-center opacity-40 cursor-not-allowed"
-                      title="Coming soon"
-                    >
-                      <span className="text-xl">{g.emoji}</span>
-                      <span className="text-[10px] font-bold text-gray-400">{g.label}</span>
-                    </div>
-                  );
-                })}
-              </div>
-
-              {/* School Board */}
-              <div className="border-t-2 border-green-50 pt-6">
-                <div className="mb-3 flex items-center gap-2">
-                  <span className="text-lg">🏫</span>
-                  <span className="text-xs font-bold uppercase tracking-wider text-green-600" style={{ fontFamily: "var(--font-fredoka)" }}>
-                    School Board
-                  </span>
-                </div>
-                <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-                  {schoolBoards.map((board) => {
-                    const sel = selectedBoard === board;
-                    return (
-                      <motion.button
-                        key={board}
-                        whileHover={{ scale: 1.04, y: -2 }}
-                        whileTap={{ scale: 0.95 }}
-                        onClick={() => setSelectedBoard(board)}
-                        className={`flex items-center justify-center rounded-2xl border-2 px-4 py-3 text-sm font-bold transition-all ${
-                          sel
-                            ? "border-green-400 bg-green-50 text-green-700 shadow-md shadow-green-200/50"
-                            : "border-green-100 bg-white text-green-600 hover:border-green-300 hover:bg-green-50/50"
-                        }`}
-                        style={{ fontFamily: "var(--font-fredoka)" }}
-                      >
-                        {sel && <CheckCircle2 className="mr-1.5 h-4 w-4 text-green-500" />}
-                        {board}
+                        <span className="text-2xl">{CLASS_EMOJI[label] ?? "🎓"}</span>
+                        <span className={`text-sm font-extrabold ${sel ? "text-green-700" : "text-green-600"}`} style={{ fontFamily: "var(--font-fredoka)" }}>{label}</span>
                       </motion.button>
                     );
                   })}
                 </div>
-              </div>
+              )}
+
             </motion.section>
           )}
 
-          {/* STEP 2 – Courses */}
+          {/* STEP 2 – Subjects */}
           {step === 2 && (
             <motion.section
               key="courses"
@@ -425,9 +346,11 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
                 <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-blue-100 text-lg">📚</span>
                 <div className="flex-1">
                   <h2 className="text-xl font-extrabold tracking-tight text-green-800 sm:text-2xl" style={{ fontFamily: "var(--font-fredoka)" }}>
-                    What do you want to learn?
+                    Which subjects do you need help with?
                   </h2>
-                  <p className="text-xs text-green-500 font-medium">Pick as many subjects as you like 🎯</p>
+                  <p className="text-xs text-green-500 font-medium">
+                    {selectedGrade ? `Subjects available for ${selectedGrade}` : "Pick as many as you like 🎯"}
+                  </p>
                 </div>
                 {selectedCourses.length > 0 && (
                   <motion.span initial={{ scale: 0 }} animate={{ scale: 1 }} className="flex items-center gap-1 rounded-full border-2 border-green-300 bg-green-50 px-3 py-1 text-xs font-extrabold text-green-700">
@@ -435,46 +358,39 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
                   </motion.span>
                 )}
               </div>
-              <div className="space-y-6">
-                {courseCategories.map((cat) => {
-                  const a = accentMap[cat.accent];
-                  return (
-                    <div key={cat.id}>
-                      <div className="mb-3 flex items-center gap-2">
-                        <span className="text-lg">{cat.emoji}</span>
-                        <span className="text-xs font-bold uppercase tracking-wider text-green-600" style={{ fontFamily: "var(--font-fredoka)" }}>{cat.label}</span>
-                      </div>
-                      <div className="flex flex-wrap gap-2">
-                        {cat.courses.map((course) => {
-                          const sel = selectedCourses.includes(course);
-                          return (
-                            <motion.button
-                              key={course}
-                              whileHover={{ scale: 1.05 }}
-                              whileTap={{ scale: 0.95 }}
-                              onClick={() => toggleCourse(course)}
-                              className={`flex items-center gap-2 rounded-full border-2 px-4 py-2 text-xs font-bold transition-all ${
-                                sel
-                                  ? `${a.bg} ${a.border} ${a.text} shadow-sm`
-                                  : "border-green-100 bg-white text-green-700 hover:border-green-300 hover:bg-green-50"
-                              }`}
-                            >
-                              <span className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-md border-2 transition-all ${sel ? a.check : "border-green-300"}`}>
-                                {sel && (
-                                  <svg className="h-2.5 w-2.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={4}>
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                                  </svg>
-                                )}
-                              </span>
-                              {course}
-                            </motion.button>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
+
+              {availableSubjects.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-12 text-center gap-2">
+                  <span className="text-4xl">📖</span>
+                  <p className="text-sm font-bold text-gray-500">No subjects available for {selectedGrade}</p>
+                  <p className="text-xs text-gray-400">Content for this class is coming soon!</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                  {availableSubjects.map((subject) => {
+                    const sel = selectedCourses.includes(subject);
+                    return (
+                      <motion.button
+                        key={subject}
+                        whileHover={{ scale: 1.04, y: -2 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => toggleCourse(subject)}
+                        className={`flex flex-col items-center gap-2 rounded-2xl border-2 px-4 py-4 text-center transition-all ${
+                          sel
+                            ? "border-green-400 bg-green-50 shadow-md shadow-green-200/50"
+                            : "border-green-100 bg-white hover:border-green-300 hover:bg-green-50/50"
+                        }`}
+                      >
+                        <span className="text-2xl">{SUBJECT_EMOJI[subject] ?? "📘"}</span>
+                        <span className={`text-xs font-extrabold leading-tight ${sel ? "text-green-700" : "text-green-600"}`} style={{ fontFamily: "var(--font-fredoka)" }}>
+                          {subject}
+                        </span>
+                        {sel && <CheckCircle2 className="h-4 w-4 text-green-500" />}
+                      </motion.button>
+                    );
+                  })}
+                </div>
+              )}
             </motion.section>
           )}
 

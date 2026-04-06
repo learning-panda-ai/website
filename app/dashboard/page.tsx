@@ -33,6 +33,8 @@ export default async function DashboardPage() {
   if (!meRes.ok) redirect("/login");
 
   const meUser = await meRes.json();
+
+  if (!meUser.is_onboarded) redirect("/login");
   // Use activity response (has updated streak) if successful, otherwise fall back to /me
   const user = activityRes.ok ? await activityRes.json() : meUser;
 
