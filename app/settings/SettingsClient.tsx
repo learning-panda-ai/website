@@ -4,7 +4,7 @@ import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Flame, LogOut } from "lucide-react";
 import { useAuth } from "@/app/providers";
-import type { SettingsTab, UserProp } from "@/components/settings/types";
+import type { SettingsTab, UserProp } from "@/types/settings";
 import { DesktopSettingsSidebar, MobileSettingsTabBar } from "@/components/settings/SettingsSidebar";
 import ProfileTab       from "@/components/settings/tabs/ProfileTab";
 import NotificationsTab from "@/components/settings/tabs/NotificationsTab";

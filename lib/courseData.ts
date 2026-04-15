@@ -1,42 +1,6 @@
-export type Difficulty = "Beginner" | "Intermediate" | "Advanced";
-
-export type Topic = {
-  id: string;
-  emoji: string;
-  title: string;
-  description: string;
-  lessons: number;
-  difficulty: Difficulty;
-};
-
-export type CourseInfo = {
-  name: string;
-  slug: string;
-  category: string;
-  categoryEmoji: string;
-  emoji: string;
-  description: string;
-  accent: {
-    bg: string;
-    border: string;
-    text: string;
-    badgeBg: string;
-    badgeText: string;
-  };
-  topics: Topic[];
-};
-
-export function slugify(name: string): string {
-  return name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
-}
-
-export function getCourseBySlug(slug: string): CourseInfo | undefined {
-  return COURSE_CATALOG.find((c) => c.slug === slug);
-}
-
-export function getCourseByName(name: string): CourseInfo | undefined {
-  return COURSE_CATALOG.find((c) => c.name === name);
-}
+// Types live in types/courses.ts — re-exported here for backward compatibility
+export type { Difficulty, Topic, CourseInfo } from "@/types/courses";
+import type { CourseInfo } from "@/types/courses";
 
 // ── Full Course Catalog ────────────────────────────────────────────────────
 

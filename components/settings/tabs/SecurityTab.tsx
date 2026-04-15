@@ -2,7 +2,8 @@
 
 import { motion } from "framer-motion";
 import { CheckCircle2, AlertTriangle } from "lucide-react";
-import { tabAnim, type UserProp } from "@/components/settings/types";
+import { tabAnim } from "@/lib/animations/settings";
+import type { UserProp } from "@/types/settings";
 
 export default function SecurityTab({ user }: { user: UserProp }) {
   const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];

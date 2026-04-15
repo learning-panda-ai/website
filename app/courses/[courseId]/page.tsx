@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { requireAuth } from "@/lib/server-auth";
 import { redirect, notFound } from "next/navigation";
-import { getCourseBySlug } from "@/lib/courseData";
+import { getCourseBySlug } from "@/lib/courses";
 import CourseDetailClient from "./CourseDetailClient";
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;

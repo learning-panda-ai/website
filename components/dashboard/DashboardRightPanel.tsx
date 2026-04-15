@@ -1,14 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { BarChart2, Calendar, Send, Bot } from "lucide-react";
-import type { Tab } from "./types";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { BarChart2, Calendar, Send } from "lucide-react";
 
 interface DashboardRightPanelProps {
   weekActivity: boolean[];
   todayIndex: number;
   currentStreak: number;
-  setActiveTab: (tab: Tab) => void;
 }
 
 const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
@@ -17,11 +17,10 @@ export default function DashboardRightPanel({
   weekActivity,
   todayIndex,
   currentStreak,
-  setActiveTab,
 }: DashboardRightPanelProps) {
+  const router = useRouter();
   const [question, setQuestion] = useState("");
 
-  // Deterministic bar heights — no Math.random() to avoid SSR/client mismatch
   const BASE_HEIGHTS = [55, 70, 85, 60, 75, 40, 90];
   const barHeights = DAYS.map((_, i) => {
     if (weekActivity[i]) return BASE_HEIGHTS[i];
@@ -32,7 +31,7 @@ export default function DashboardRightPanel({
   function handleAsk(e: React.FormEvent) {
     e.preventDefault();
     if (question.trim()) {
-      setActiveTab("text");
+      router.push("/dashboard/ask");
     }
   }
 
@@ -107,15 +106,14 @@ export default function DashboardRightPanel({
               </p>
             </div>
           </div>
-          <button
-            onClick={() => setActiveTab("courses")}
-            className="mt-5 w-full py-3 bg-[#FFB74D] text-[#2a1700] font-black rounded-full text-sm uppercase tracking-widest shadow-lg shadow-black/10 hover:scale-[1.02] active:scale-95 transition-transform"
+          <Link
+            href="/dashboard/courses"
+            className="mt-5 block w-full py-3 bg-[#FFB74D] text-[#2a1700] font-black rounded-full text-sm uppercase tracking-widest text-center shadow-lg shadow-black/10 hover:scale-[1.02] active:scale-95 transition-transform"
             style={{ fontFamily: "var(--font-fredoka)" }}
           >
             Continue Learning
-          </button>
+          </Link>
         </div>
-        {/* Decorative panda */}
         <div className="absolute -right-4 -bottom-4 opacity-10 scale-150 rotate-12 pointer-events-none text-7xl">
           🐼
         </div>

@@ -11,7 +11,8 @@ import {
   BookOpen,
   ChevronRight,
 } from "lucide-react";
-import { COURSE_CATALOG, getCourseByName } from "@/lib/courseData";
+import { COURSE_CATALOG } from "@/lib/courseData";
+import { getCourseByName } from "@/lib/courses";
 
 interface CoursesClientProps {
   user: {

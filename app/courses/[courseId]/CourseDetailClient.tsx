@@ -12,7 +12,7 @@ import {
   Zap,
   Clock,
 } from "lucide-react";
-import type { CourseInfo, Difficulty } from "@/lib/courseData";
+import type { CourseInfo, Difficulty } from "@/types/courses";
 
 interface CourseDetailClientProps {
   course: CourseInfo;

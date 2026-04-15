@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useAuth } from "@/app/providers";
 import { useRouter } from "next/navigation";
-import LoginSignup from "@/components/LoginSignup";
+import LoginSignup from "@/components/auth/LoginSignup";
 import Onboarding from "@/components/onboarding/Onboarding";
 import { Sparkles, CheckCircle2 } from "lucide-react";
 

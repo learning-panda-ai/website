@@ -8,62 +8,18 @@ import {
   CheckCircle2,
   School,
 } from "lucide-react";
-import BasicDetails, { type BasicDetailsData } from "@/components/onboarding/BasicDetails";
-
-/* ═══════════════════ DATA ═══════════════════ */
-
-const CLASS_EMOJI: Record<string, string> = {
-  "Class 1": "🌱", "Class 2": "🌿", "Class 3": "🍀", "Class 4": "🌻",
-  "Class 5": "⭐", "Class 6": "🌟", "Class 7": "🔥", "Class 8": "💫",
-  "Class 9": "🚀", "Class 10": "🏆", "Class 11": "💎", "Class 12": "👑",
-};
-
-const SUBJECT_EMOJI: Record<string, string> = {
-  Mathematics: "📐", Physics: "⚛️", Chemistry: "🧪", Biology: "🧬",
-  Science: "🔬", "Computer Science": "💻", English: "📖", Hindi: "🇮🇳",
-  "Social Science": "🌍", History: "📜", Geography: "🗺️", Economics: "💰",
-  "English Grammar": "✍️", "English Literature": "📚", Sanskrit: "🕉️",
-};
+import BasicDetails from "@/components/onboarding/BasicDetails";
+import type { BasicDetailsData, OnboardingOptions, OnboardingOption } from "@/types/onboarding";
+import {
+  CLASS_EMOJI, SUBJECT_EMOJI,
+  FAVORITE_SUBJECTS, STUDY_FEELINGS, CAREER_OPTIONS, STRENGTHS_OPTIONS,
+  FLOATING_ITEMS,
+} from "@/data/onboarding";
 
 // "Class 10" → "class-10" for backend storage
 function classLabelToId(label: string): string {
   return label.toLowerCase().replace(" ", "-");
 }
-
-interface OnboardingOptions {
-  classes: string[];
-  subjects_by_class: Record<string, string[]>;
-}
-
-// Step 3 – About You questions
-const favoriteSubjects = [
-  { id: "maths",          label: "Maths",          emoji: "🔢" },
-  { id: "science",        label: "Science",         emoji: "🧪" },
-  { id: "english",        label: "English",         emoji: "📖" },
-  { id: "social-science", label: "Social Science",  emoji: "🌍" },
-  { id: "computer",       label: "Computer",        emoji: "💻" },
-  { id: "not-sure",       label: "Not sure yet",    emoji: "🤷" },
-];
-
-const studyFeelings = [
-  { id: "enjoy",    label: "I enjoy learning",  emoji: "😊" },
-  { id: "okay",     label: "It's okay",         emoji: "🙂" },
-  { id: "stressed", label: "I feel stressed",   emoji: "😓" },
-  { id: "confused", label: "I feel confused",   emoji: "🤔" },
-];
-
-const careerOptions = [
-  { id: "have-idea",    label: "Yes, I have an idea",    emoji: "💡" },
-  { id: "many-options", label: "I have many options",    emoji: "🌟" },
-  { id: "not-yet",      label: "Not yet",                emoji: "🤷" },
-  { id: "confused",     label: "I feel confused",        emoji: "😕" },
-];
-
-const strengthsOptions = [
-  { id: "yes",      label: "Yes, definitely!",  emoji: "🚀" },
-  { id: "maybe",    label: "Maybe",             emoji: "🤔" },
-  { id: "not-sure", label: "Not sure",          emoji: "💭" },
-];
 
 /* ═══════════════════ COMPONENT ═══════════════════ */
 
@@ -163,14 +119,6 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
     }
   };
 
-  const floatingItems = [
-    { emoji: "🎋", top: "5%",  left: "3%",  delay: 0,   dur: 7 },
-    { emoji: "🍃", top: "12%", right: "5%", delay: 1,   dur: 6 },
-    { emoji: "⭐", top: "35%", left: "2%",  delay: 0.5, dur: 5 },
-    { emoji: "📖", top: "55%", right: "3%", delay: 2,   dur: 8 },
-    { emoji: "🌿", top: "75%", left: "4%",  delay: 1.5, dur: 6 },
-    { emoji: "💡", top: "90%", right: "4%", delay: 0.8, dur: 7 },
-  ];
 
   const progressSteps = [
     { label: "Details",  done: isBasicDetailsComplete() },
@@ -184,7 +132,7 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
       className="relative min-h-screen bamboo-dots flex flex-col"
       style={{ background: "linear-gradient(180deg, #FFFDF7 0%, #F1F8E9 40%, #E8F5E9 100%)" }}
     >
-      {floatingItems.map((f, i) => (
+      {FLOATING_ITEMS.map((f, i) => (
         <motion.span
           key={i}
           className="pointer-events-none fixed select-none text-2xl opacity-30 sm:text-3xl"
@@ -430,7 +378,7 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
                 <QuestionBlock
                   emoji="🏆"
                   question="Which subject do you like the MOST?"
-                  options={favoriteSubjects}
+                  options={FAVORITE_SUBJECTS}
                   value={favoriteSubject}
                   onChange={setFavoriteSubject}
                   cols={3}
@@ -440,7 +388,7 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
                 <QuestionBlock
                   emoji="📖"
                   question="How do you feel about studies right now?"
-                  options={studyFeelings}
+                  options={STUDY_FEELINGS}
                   value={studyFeeling}
                   onChange={setStudyFeeling}
                   cols={2}
@@ -450,7 +398,7 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
                 <QuestionBlock
                   emoji="🔭"
                   question="Have you ever thought about your future career?"
-                  options={careerOptions}
+                  options={CAREER_OPTIONS}
                   value={careerThoughts}
                   onChange={setCareerThoughts}
                   cols={2}
@@ -460,7 +408,7 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
                 <QuestionBlock
                   emoji="💪"
                   question="Are you interested in discovering your strengths and future skills?"
-                  options={strengthsOptions}
+                  options={STRENGTHS_OPTIONS}
                   value={strengthsInterest}
                   onChange={setStrengthsInterest}
                   cols={3}
@@ -528,12 +476,6 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
 
 /* ── Reusable question block for Step 3 ── */
 
-interface Option {
-  id: string;
-  label: string;
-  emoji: string;
-}
-
 function QuestionBlock({
   emoji,
   question,
@@ -544,7 +486,7 @@ function QuestionBlock({
 }: {
   emoji: string;
   question: string;
-  options: Option[];
+  options: OnboardingOption[];
   value: string | null;
   onChange: (v: string) => void;
   cols?: number;

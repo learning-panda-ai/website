@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import { Zap, CheckCircle2, XCircle } from "lucide-react";
-import { tabAnim } from "@/components/settings/types";
+import { tabAnim } from "@/lib/animations/settings";
 
 const FREE_FEATURES = [
   { ok: true,  text: "Ask Panda up to 20 questions / day" },

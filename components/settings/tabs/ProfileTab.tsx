@@ -3,7 +3,9 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Save, Loader2, CheckCircle2, Camera, Star } from "lucide-react";
-import { tabAnim, ALL_GRADES, COURSE_CATEGORIES, type UserProp } from "@/components/settings/types";
+import { tabAnim } from "@/lib/animations/settings";
+import { ALL_GRADES, COURSE_CATEGORIES } from "@/data/settings";
+import type { UserProp } from "@/types/settings";
 
 export default function ProfileTab({ user }: { user: UserProp }) {
   const [form, setForm] = useState({

@@ -1,28 +1,31 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Flame, Star, ChevronRight } from "lucide-react";
-import type { Tab } from "./types";
-import type { DashboardUser } from "@/app/dashboard/DashboardClient";
+import type { DashboardUser } from "@/types/dashboard";
 
-const TAB_LABELS: Record<Tab, string> = {
-  courses:    "Courses",
-  progress:   "Progress",
-  profile:    "Account",
-  text:       "Ask Panda",
-  video:      "Video Chat",
-  audio:      "Voice Chat",
-  quizzes:    "Gamify",
-  challenges: "Challenges",
+const PATH_LABELS: Record<string, string> = {
+  "/dashboard/courses":        "Courses",
+  "/dashboard/progress":       "Progress",
+  "/dashboard/profile":        "Account",
+  "/dashboard/ask":            "Ask Panda",
+  "/dashboard/gamify":         "Gamify",
+  "/dashboard/gamify/quiz":    "Quizzes",
+  "/dashboard/gamify/compete": "Compete",
 };
+
+function getLabel(pathname: string): string {
+  return PATH_LABELS[pathname] ?? "Dashboard";
+}
 
 interface DashboardHeaderProps {
   user: DashboardUser;
-  activeTab: Tab;
   questionsAsked: number;
 }
 
-export default function DashboardHeader({ user, activeTab, questionsAsked }: DashboardHeaderProps) {
+export default function DashboardHeader({ user, questionsAsked }: DashboardHeaderProps) {
+  const pathname = usePathname();
   const firstName = user?.name?.split(" ")[0] ?? "Learner";
   const xp = questionsAsked * 25;
 
@@ -32,7 +35,7 @@ export default function DashboardHeader({ user, activeTab, questionsAsked }: Das
       <nav className="flex items-center text-sm text-[#44483D] font-medium">
         <span>Dashboard</span>
         <ChevronRight className="h-4 w-4 mx-1 opacity-40" />
-        <span className="text-[#43A047] font-semibold">{TAB_LABELS[activeTab]}</span>
+        <span className="text-[#43A047] font-semibold">{getLabel(pathname)}</span>
       </nav>
 
       {/* Right cluster */}

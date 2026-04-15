@@ -3,8 +3,8 @@
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { Pencil } from "lucide-react";
-import { tabAnim } from "../types";
-import type { DashboardUser } from "@/app/dashboard/DashboardClient";
+import { tabAnim } from "@/lib/animations/dashboard";
+import type { DashboardUser } from "@/types/dashboard";
 
 interface ProfileTabProps {
   user: DashboardUser;

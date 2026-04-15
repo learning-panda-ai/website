@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { tabAnim } from "@/components/settings/types";
+import { tabAnim } from "@/lib/animations/settings";
 
 type Pref = "streak" | "weeklyReport" | "newFeatures" | "parentDigest" | "aiSuggestions";
 

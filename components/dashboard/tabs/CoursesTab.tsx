@@ -3,8 +3,8 @@
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { Plus, ArrowRight, Pencil } from "lucide-react";
-import { getCourseByName } from "@/lib/courseData";
-import { tabAnim } from "../types";
+import { getCourseByName } from "@/lib/courses";
+import { tabAnim } from "@/lib/animations/dashboard";
 
 interface CoursesTabProps {
   enrolledCourses: string[];

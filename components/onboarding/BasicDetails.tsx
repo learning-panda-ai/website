@@ -4,28 +4,9 @@ import React from "react";
 import { motion } from "framer-motion";
 import { CheckCircle2, AlertCircle, ChevronDown } from "lucide-react";
 
-export interface BasicDetailsData {
-  firstName: string;
-  lastName: string;
-  state: string;
-  city: string;
-  parentName: string;
-  parentMobile: string;
-  parentEmail: string;
-}
-
-/* ── India States & Cities Data ── */
-
-const indianStates = [
-  "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chhattisgarh",
-  "Goa", "Gujarat", "Haryana", "Himachal Pradesh", "Jharkhand", "Karnataka",
-  "Kerala", "Madhya Pradesh", "Maharashtra", "Manipur", "Meghalaya", "Mizoram",
-  "Nagaland", "Odisha", "Punjab", "Rajasthan", "Sikkim", "Tamil Nadu",
-  "Telangana", "Tripura", "Uttar Pradesh", "Uttarakhand", "West Bengal",
-  "Andaman and Nicobar Islands", "Chandigarh",
-  "Dadra and Nagar Haveli and Daman and Diu",
-  "Delhi", "Jammu and Kashmir", "Ladakh", "Lakshadweep", "Puducherry",
-];
+export type { BasicDetailsData } from "@/types/onboarding";
+import type { BasicDetailsData } from "@/types/onboarding";
+import { INDIAN_STATES } from "@/data/geography";
 
 
 /* ── Component ── */
@@ -141,7 +122,7 @@ export default function BasicDetails({ data, onChange }: BasicDetailsProps) {
                 className={selectClass}
               >
                 <option value="">Select your state…</option>
-                {indianStates.map((s) => (
+                {INDIAN_STATES.map((s) => (
                   <option key={s} value={s}>
                     {s}
                   </option>

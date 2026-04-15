@@ -1,17 +1,32 @@
 "use client";
 
-import type { Tab } from "./types";
-import { SIDEBAR_ITEMS, MOBILE_TABS } from "./types";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { BookOpen, TrendingUp, Bot, Trophy, User } from "lucide-react";
 
-interface NavProps {
-  activeTab: Tab;
-  setActiveTab: (tab: Tab) => void;
+const SIDEBAR_ITEMS = [
+  { href: "/dashboard/courses",  label: "Courses",   Icon: BookOpen   },
+  { href: "/dashboard/progress", label: "Progress",  Icon: TrendingUp },
+  { href: "/dashboard/ask",      label: "Ask Panda", Icon: Bot        },
+  { href: "/dashboard/gamify",   label: "Gamify",    Icon: Trophy     },
+  { href: "/dashboard/profile",  label: "Account",   Icon: User       },
+];
+
+const MOBILE_ITEMS = [
+  { href: "/dashboard/courses",  label: "Home",     Icon: BookOpen   },
+  { href: "/dashboard/ask",      label: "AI Chat",  Icon: Bot        },
+  { href: "/dashboard/progress", label: "Progress", Icon: TrendingUp },
+  { href: "/dashboard/gamify",   label: "Rank",     Icon: Trophy     },
+  { href: "/dashboard/profile",  label: "Me",       Icon: User       },
+];
+
+interface DesktopSidebarProps {
   enrolledCourses: string[];
 }
 
-const COMING_SOON = new Set<Tab>(["quizzes", "challenges"]);
+export function DesktopSidebar({ enrolledCourses }: DesktopSidebarProps) {
+  const pathname = usePathname();
 
-export function DesktopSidebar({ activeTab, setActiveTab, enrolledCourses }: NavProps) {
   return (
     <aside className="hidden md:flex flex-col fixed left-0 top-0 h-full py-8 w-64 bg-[#F5F2EA] border-r border-[#43A047]/10 z-40 shadow-[0_20px_25px_-5px_rgba(67,160,71,0.08),0_8px_10px_-6px_rgba(67,160,71,0.08)]">
       {/* Logo */}
@@ -32,13 +47,12 @@ export function DesktopSidebar({ activeTab, setActiveTab, enrolledCourses }: Nav
 
       {/* Nav items */}
       <nav className="flex-1 px-4 space-y-1">
-        {SIDEBAR_ITEMS.map(({ id, label, Icon }) => {
-          const isActive = activeTab === id;
-          const isSoon = COMING_SOON.has(id);
+        {SIDEBAR_ITEMS.map(({ href, label, Icon }) => {
+          const isActive = pathname === href || pathname.startsWith(href + "/");
           return (
-            <button
-              key={id}
-              onClick={() => setActiveTab(id)}
+            <Link
+              key={href}
+              href={href}
               className={`w-full flex items-center gap-4 px-4 py-3 text-sm font-semibold rounded-xl transition-all duration-200 ${
                 isActive
                   ? "text-[#43A047] font-bold bg-[#43A047]/10 border-r-4 border-[#43A047] rounded-r-none"
@@ -46,47 +60,46 @@ export function DesktopSidebar({ activeTab, setActiveTab, enrolledCourses }: Nav
               }`}
               style={{ fontFamily: "var(--font-fredoka)" }}
             >
-              <Icon className={`h-5 w-5 flex-shrink-0 ${isActive ? "text-[#43A047]" : "text-[#75796C]"}`} />
+              <Icon
+                className={`h-5 w-5 flex-shrink-0 ${isActive ? "text-[#43A047]" : "text-[#75796C]"}`}
+              />
               <span>{label}</span>
-              {id === "courses" && enrolledCourses.length > 0 && (
+              {href === "/dashboard/courses" && enrolledCourses.length > 0 && (
                 <span className="ml-auto text-[10px] bg-[#43A047]/15 text-[#43A047] font-bold px-2 py-0.5 rounded-full">
                   {enrolledCourses.length}
                 </span>
               )}
-              {isSoon && (
-                <span className="ml-auto text-[9px] bg-amber-100 text-amber-600 font-bold px-1.5 py-0.5 rounded-full tracking-wide">
-                  SOON
-                </span>
-              )}
-            </button>
+            </Link>
           );
         })}
       </nav>
 
       {/* Start Learning CTA */}
       <div className="px-6 mt-auto">
-        <button
-          onClick={() => setActiveTab("courses")}
-          className="w-full bg-[#43A047] text-white py-4 rounded-full font-bold shadow-lg shadow-[#43A047]/20 hover:scale-[1.02] hover:bg-[#388E3C] active:scale-95 transition-all"
+        <Link
+          href="/dashboard/courses"
+          className="block w-full bg-[#43A047] text-white py-4 rounded-full font-bold text-center shadow-lg shadow-[#43A047]/20 hover:scale-[1.02] hover:bg-[#388E3C] active:scale-95 transition-all"
           style={{ fontFamily: "var(--font-fredoka)" }}
         >
           Start Learning
-        </button>
+        </Link>
       </div>
     </aside>
   );
 }
 
-export function MobileTabBar({ activeTab, setActiveTab }: Omit<NavProps, "enrolledCourses">) {
+export function MobileTabBar() {
+  const pathname = usePathname();
+
   return (
     <nav className="md:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-6 pt-3 bg-[#FDFBF7]/90 backdrop-blur-xl rounded-t-[28px] border-t border-[#43A047]/5 shadow-[0_-4px_16px_rgba(0,0,0,0.06)]">
-      {MOBILE_TABS.map(({ id, label, Icon }) => {
-        const isActive = activeTab === id;
-        const isCenter = id === "text";
+      {MOBILE_ITEMS.map(({ href, label, Icon }) => {
+        const isActive = pathname === href || pathname.startsWith(href + "/");
+        const isCenter = href === "/dashboard/ask";
         return (
-          <button
-            key={id}
-            onClick={() => setActiveTab(id)}
+          <Link
+            key={href}
+            href={href}
             className={`flex flex-col items-center justify-center gap-1 transition-all ${
               isCenter
                 ? `bg-[#43A047] text-white rounded-full p-2.5 w-12 h-12 -translate-y-2 shadow-lg shadow-[#43A047]/30 ${isActive ? "scale-110" : ""}`
@@ -96,13 +109,15 @@ export function MobileTabBar({ activeTab, setActiveTab }: Omit<NavProps, "enroll
             }`}
             style={{ fontFamily: "var(--font-fredoka)" }}
           >
-            <Icon className={`${isCenter ? "h-5 w-5" : "h-5 w-5"}`} />
+            <Icon className="h-5 w-5" />
             {!isCenter && (
-              <span className={`text-[10px] font-bold leading-none ${isActive ? "text-[#43A047]" : "text-[#75796C]"}`}>
+              <span
+                className={`text-[10px] font-bold leading-none ${isActive ? "text-[#43A047]" : "text-[#75796C]"}`}
+              >
                 {label}
               </span>
             )}
-          </button>
+          </Link>
         );
       })}
     </nav>

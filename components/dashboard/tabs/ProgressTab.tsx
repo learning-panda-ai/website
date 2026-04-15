@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { tabAnim } from "../types";
+import { tabAnim } from "@/lib/animations/dashboard";
 
 
 interface ProgressTabProps {
