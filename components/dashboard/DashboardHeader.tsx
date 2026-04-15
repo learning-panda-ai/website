@@ -1,82 +1,76 @@
+"use client";
+
 import Link from "next/link";
-import { Pencil } from "lucide-react";
+import { Flame, Star, ChevronRight } from "lucide-react";
+import type { Tab } from "./types";
 import type { DashboardUser } from "@/app/dashboard/DashboardClient";
+
+const TAB_LABELS: Record<Tab, string> = {
+  courses:    "Courses",
+  progress:   "Progress",
+  profile:    "Account",
+  text:       "Ask Panda",
+  video:      "Video Chat",
+  audio:      "Voice Chat",
+  quizzes:    "Gamify",
+  challenges: "Challenges",
+};
 
 interface DashboardHeaderProps {
   user: DashboardUser;
-  enrolledCourses: string[];
+  activeTab: Tab;
+  questionsAsked: number;
 }
 
-export default function DashboardHeader({ user, enrolledCourses }: DashboardHeaderProps) {
+export default function DashboardHeader({ user, activeTab, questionsAsked }: DashboardHeaderProps) {
   const firstName = user?.name?.split(" ")[0] ?? "Learner";
+  const xp = questionsAsked * 25;
 
   return (
-    <>
-      {/* Streak banner */}
-      <div
-        className="bg-gradient-to-r from-green-600 to-emerald-500 text-white"
-        style={{ fontFamily: "var(--font-fredoka)" }}
-      >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-11 flex items-center justify-between gap-4">
-          <p className="text-sm font-semibold truncate">
-            {user.current_streak > 0
-              ? `🐼 ${user.current_streak} day streak — keep it going!`
-              : "🐼 Start leveling up and building your daily streak!"}
-          </p>
-          <div className="flex items-center gap-5 flex-shrink-0">
-            <div className="flex items-center gap-1.5 text-sm font-bold">
-              🔥 <span>{user.current_streak}</span>
-              <span className="font-normal text-green-100 hidden sm:inline">day streak</span>
-            </div>
-            <div className="hidden sm:flex items-center gap-2 text-sm">
-              <span className="font-bold">Level 1</span>
-              <div className="w-20 h-1.5 bg-white/30 rounded-full overflow-hidden">
-                <div className="h-full w-0 bg-white rounded-full" />
-              </div>
-              <span className="text-green-100 text-xs">0 / 1 skill</span>
-            </div>
+    <header className="sticky top-0 z-30 bg-[#FDFBF7]/80 backdrop-blur-xl px-6 py-4 flex flex-wrap items-center justify-between gap-4 border-b border-[#43A047]/5">
+      {/* Breadcrumb */}
+      <nav className="flex items-center text-sm text-[#44483D] font-medium">
+        <span>Dashboard</span>
+        <ChevronRight className="h-4 w-4 mx-1 opacity-40" />
+        <span className="text-[#43A047] font-semibold">{TAB_LABELS[activeTab]}</span>
+      </nav>
+
+      {/* Right cluster */}
+      <div className="flex items-center gap-3 sm:gap-4">
+        {/* Streak */}
+        <div className="flex items-center gap-1.5 bg-amber-50 px-3 py-1.5 rounded-full border border-amber-100">
+          <Flame className="h-4 w-4 text-amber-500" fill="currentColor" />
+          <span className="font-bold text-amber-700 text-sm">{user.current_streak} Days</span>
+        </div>
+
+        {/* XP */}
+        <div className="hidden sm:flex items-center gap-1.5 bg-[#43A047]/10 px-3 py-1.5 rounded-full border border-[#43A047]/20">
+          <Star className="h-4 w-4 text-[#43A047]" fill="currentColor" />
+          <span className="font-bold text-[#43A047] text-sm">{xp.toLocaleString("en-US")} XP</span>
+        </div>
+
+        <div className="hidden sm:block h-7 w-px bg-[#CFD8DC]" />
+
+        {/* User */}
+        <div className="flex items-center gap-2.5">
+          <div className="text-right hidden sm:block">
+            <p className="text-sm font-bold leading-none text-[#1B1C17]">{firstName}</p>
+            <p className="text-[10px] text-[#44483D] font-semibold mt-0.5">Pro Student</p>
           </div>
+          <Link
+            href="/settings"
+            className="w-9 h-9 rounded-full border-2 border-[#43A047]/30 bg-[#C8E6C9] flex items-center justify-center text-sm font-bold text-[#1B5E20] flex-shrink-0 hover:border-[#43A047] hover:scale-105 transition-all"
+            title="Account Settings"
+          >
+            {user.image ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={user.image} alt={firstName} className="w-full h-full rounded-full object-cover" />
+            ) : (
+              firstName[0]
+            )}
+          </Link>
         </div>
       </div>
-
-      {/* Profile header */}
-      <div className="bg-gray-50 border-b border-gray-100">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-5 flex items-center gap-3 sm:gap-4">
-          <div className="h-12 w-12 sm:h-14 sm:w-14 rounded-2xl bg-green-100 border-2 border-green-200 flex items-center justify-center text-xl sm:text-2xl font-bold text-green-700 flex-shrink-0">
-            {firstName[0]}
-          </div>
-          <div className="flex-1 min-w-0">
-            <p
-              className="font-extrabold text-gray-800 text-sm sm:text-base leading-tight truncate"
-              style={{ fontFamily: "var(--font-fredoka)" }}
-            >
-              {user?.name}
-            </p>
-            <p className="text-xs sm:text-sm text-gray-400 mt-0.5 truncate">{user?.email}</p>
-          </div>
-
-          <div className="flex items-center gap-2 flex-shrink-0">
-            <div className="hidden sm:flex items-center gap-2">
-              {enrolledCourses.length > 0 && (
-                <span className="text-xs font-bold bg-green-100 text-green-700 border border-green-200 px-3 py-1 rounded-full">
-                  📚 {enrolledCourses.length} {enrolledCourses.length === 1 ? "course" : "courses"}
-                </span>
-              )}
-              <span className="text-xs font-bold bg-orange-50 text-orange-600 border border-orange-100 px-3 py-1 rounded-full">
-                🔥 {user.current_streak} {user.current_streak === 1 ? "day" : "days"}
-              </span>
-            </div>
-            <Link
-              href="/settings"
-              className="flex items-center gap-1.5 text-sm font-bold text-gray-600 border border-gray-200 hover:border-green-400 hover:text-green-700 bg-white px-3 sm:px-4 py-2 rounded-xl transition-all"
-              style={{ fontFamily: "var(--font-fredoka)" }}
-            >
-              <Pencil className="h-3.5 w-3.5" />
-              <span className="hidden sm:block">Edit Profile</span>
-            </Link>
-          </div>
-        </div>
-      </div>
-    </>
+    </header>
   );
 }

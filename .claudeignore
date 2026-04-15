@@ -1,0 +1,52 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Next.js build output
+.next/
+out/
+dist/
+build/
+
+# Generated / compiled
+*.min.js
+*.map
+*.d.ts
+
+# Lock files (large, rarely useful)
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Environment & secrets
+.env
+.env.local
+.env*.local
+.env.production
+
+# Test coverage
+coverage/
+.nyc_output/
+
+# Large static assets
+public/images/
+public/fonts/
+*.png
+*.jpg
+*.jpeg
+*.svg
+*.ico
+*.woff
+*.woff2
+
+# Logs & cache
+*.log
+.eslintcache
+.cache/
+.turbo/
+
+# Editor & OS
+.DS_Store
+.vscode/
+.idea/
+Thumbs.db

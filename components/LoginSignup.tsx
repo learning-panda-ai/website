@@ -2,27 +2,23 @@
 
 import React, { useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Sparkles, Lightbulb, ShieldCheck, Mail, ArrowLeft, RefreshCw } from "lucide-react";
+import { Sparkles, ShieldCheck, Mail, ArrowLeft, RefreshCw, ArrowRight, Star } from "lucide-react";
 import { Turnstile } from "@marsidev/react-turnstile";
 import type { TurnstileInstance } from "@marsidev/react-turnstile";
 import { useAuth } from "@/app/providers";
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
-const features = [
-  { icon: "🎓", label: "Smart Learning" },
-  { icon: "⚡", label: "Instant Help" },
-  { icon: "📚", label: "1000+ Courses" },
-  { icon: "🎮", label: "Fun & Games" },
+const stats = [
+  { value: "50K+", label: "Students" },
+  { value: "4.9", label: "Rating", icon: <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" /> },
+  { value: "1000+", label: "Lessons" },
 ];
 
-const floatingEmojis = [
-  { emoji: "🍃", top: "8%", left: "8%", delay: 0, duration: 6 },
-  { emoji: "🎋", top: "18%", right: "18%", delay: 1, duration: 7 },
-  { emoji: "⭐", bottom: "25%", left: "12%", delay: 0.5, duration: 5 },
-  { emoji: "📖", bottom: "12%", right: "15%", delay: 2, duration: 8 },
-  { emoji: "🌿", top: "45%", left: "5%", delay: 1.5, duration: 6 },
-  { emoji: "💡", top: "70%", right: "8%", delay: 0.8, duration: 7 },
+const highlights = [
+  { emoji: "🎓", title: "AI Tutor", desc: "Personalized for your grade" },
+  { emoji: "⚡", title: "Instant Help", desc: "Answers in seconds, 24/7" },
+  { emoji: "📈", title: "Track Progress", desc: "See yourself improve daily" },
 ];
 
 type AuthStep = "method" | "email-input" | "otp-input";
@@ -34,7 +30,6 @@ export default function LoginSignup() {
   const [error, setError] = useState<string | null>(null);
   const turnstileRef = useRef<TurnstileInstance>(null);
 
-  // Email OTP state
   const [step, setStep] = useState<AuthStep>("method");
   const [email, setEmail] = useState("");
   const [otp, setOtp] = useState("");
@@ -81,9 +76,6 @@ export default function LoginSignup() {
     setSendingOtp(true);
     setError(null);
     try {
-      // Send the token directly to the backend — it verifies server-side via Cloudflare.
-      // Do NOT call /api/verify-turnstile first: Turnstile tokens are single-use and
-      // consuming it here would cause the backend verification to fail with 401.
       const res = await fetch(`${BACKEND_URL}/api/v1/auth/send-otp`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -91,13 +83,11 @@ export default function LoginSignup() {
       });
       const data = await res.json();
       if (!res.ok) {
-        // Token was rejected — reset widget so user can get a fresh one
         turnstileRef.current?.reset();
         setTurnstileToken(null);
         setError(data.detail ?? "Failed to send OTP.");
         return;
       }
-      // Token consumed by backend — reset widget for any future actions
       turnstileRef.current?.reset();
       setTurnstileToken(null);
       setStep("otp-input");
@@ -155,8 +145,6 @@ export default function LoginSignup() {
         setOtp("");
         return;
       }
-
-      // Store session cookies via Next.js route
       await fetch("/api/auth/set-session", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -165,8 +153,6 @@ export default function LoginSignup() {
           refresh_token: data.refresh_token,
         }),
       });
-
-      // Update auth context — login page will react to is_onboarded state
       await refreshAuth();
     } catch {
       setError("Something went wrong. Please try again.");
@@ -176,151 +162,252 @@ export default function LoginSignup() {
   }
 
   return (
-    <div className="flex min-h-screen w-full flex-col lg:flex-row overflow-hidden">
-      {/* Left: Bamboo Forest Panel */}
+    <div className="flex min-h-screen w-full overflow-hidden bg-white">
+      {/* ── Left: Brand Panel ── */}
       <motion.div
-        initial={{ opacity: 0, x: -40 }}
+        initial={{ opacity: 0, x: -30 }}
         animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.7, ease: "easeOut" }}
-        className="panda-forest-bg relative isolate hidden lg:flex flex-col items-center justify-center overflow-hidden px-8 py-16 lg:w-1/2 lg:py-0"
+        transition={{ duration: 0.6, ease: "easeOut" }}
+        className="relative hidden lg:flex lg:w-[52%] flex-col overflow-hidden"
+        style={{
+          background: "linear-gradient(145deg, #0a2e14 0%, #0f4a22 25%, #166534 55%, #15803d 75%, #16a34a 100%)",
+        }}
       >
-        <div className="glow-orb glow-orb-1" />
-        <div className="glow-orb glow-orb-2" />
-        <div className="glow-orb glow-orb-3" />
+        {/* Decorative blobs */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div
+            className="absolute rounded-full"
+            style={{
+              width: 420,
+              height: 420,
+              top: "-80px",
+              right: "-100px",
+              background: "radial-gradient(circle, rgba(74,222,128,0.18) 0%, transparent 70%)",
+            }}
+          />
+          <div
+            className="absolute rounded-full"
+            style={{
+              width: 300,
+              height: 300,
+              bottom: "60px",
+              left: "-60px",
+              background: "radial-gradient(circle, rgba(250,204,21,0.12) 0%, transparent 70%)",
+            }}
+          />
+          <div
+            className="absolute rounded-full"
+            style={{
+              width: 200,
+              height: 200,
+              top: "45%",
+              left: "55%",
+              background: "radial-gradient(circle, rgba(34,197,94,0.1) 0%, transparent 70%)",
+            }}
+          />
+          {/* Subtle grid */}
+          <div
+            className="absolute inset-0"
+            style={{
+              backgroundImage: "radial-gradient(circle, rgba(255,255,255,0.04) 1px, transparent 1px)",
+              backgroundSize: "32px 32px",
+            }}
+          />
+        </div>
 
-        {floatingEmojis.map((item, i) => (
-          <motion.span
-            key={i}
-            className="absolute text-3xl select-none pointer-events-none opacity-60"
-            style={{ top: item.top, left: item.left, right: item.right, bottom: item.bottom }}
-            animate={{ y: [0, -20, 0], rotate: [0, 10, -10, 0], scale: [1, 1.1, 1] }}
-            transition={{ duration: item.duration, repeat: Infinity, ease: "easeInOut", delay: item.delay }}
-          >
-            {item.emoji}
-          </motion.span>
-        ))}
-
-        <div className="relative z-10 mx-auto max-w-md text-center">
+        {/* Content */}
+        <div className="relative z-10 flex flex-col h-full px-12 py-14 justify-between">
+          {/* Logo */}
           <motion.div
-            initial={{ scale: 0, rotate: -10 }}
-            animate={{ scale: 1, rotate: 0 }}
-            transition={{ delay: 0.3, type: "spring", stiffness: 200, damping: 15 }}
-            className="mx-auto mb-6"
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="flex items-center gap-3"
           >
-            <div className="panda-bounce mx-auto flex h-24 w-24 items-center justify-center rounded-3xl bg-white/90 shadow-xl shadow-black/20 border-2 border-white/50">
-              <span className="text-5xl">🐼</span>
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/15 backdrop-blur-sm border border-white/20">
+              <span className="text-xl">🐼</span>
             </div>
-          </motion.div>
-
-          <motion.h1
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4, duration: 0.6 }}
-            className="mb-2 text-4xl font-extrabold tracking-tight text-white lg:text-5xl"
-            style={{ fontFamily: "var(--font-fredoka), var(--font-nunito), sans-serif" }}
-          >
-            Learning Panda
-          </motion.h1>
-
-          <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.5, type: "spring" }}
-            className="mb-6 inline-flex items-center gap-2 rounded-full bg-yellow-500/25 px-5 py-2 backdrop-blur-sm border border-yellow-400/40"
-          >
-            <Lightbulb className="h-4 w-4 text-yellow-300" />
-            <span className="text-sm font-bold text-yellow-100" style={{ fontFamily: "var(--font-fredoka)" }}>
-              AI-Powered
+            <span
+              className="text-xl font-bold text-white"
+              style={{ fontFamily: "var(--font-fredoka)" }}
+            >
+              Learning Panda
             </span>
-            <Sparkles className="h-4 w-4 text-yellow-300" />
           </motion.div>
 
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.6, duration: 0.6 }}
-            className="mb-10 text-base leading-relaxed text-green-100/90 font-medium"
-          >
-            Your cheerful AI study buddy that makes learning
-            <br />
-            <span className="text-yellow-200 font-bold">fun</span>,{" "}
-            <span className="text-green-200 font-bold">easy</span>, and{" "}
-            <span className="text-white font-bold">effective!</span> 🚀
-          </motion.p>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.7, duration: 0.6 }}
-            className="flex flex-wrap items-center justify-center gap-3"
-          >
-            {features.map((f, i) => (
+          {/* Main hero content */}
+          <div className="flex flex-col gap-8">
+            {/* Mascot + heading */}
+            <div>
               <motion.div
-                key={f.label}
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.8 + i * 0.1, type: "spring" }}
-                className="flex items-center gap-2 rounded-2xl border border-white/25 bg-white/15 px-4 py-2.5 backdrop-blur-sm"
+                initial={{ scale: 0.5, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ delay: 0.3, type: "spring", stiffness: 160, damping: 14 }}
+                className="mb-7 inline-flex"
               >
-                <span className="text-lg">{f.icon}</span>
-                <span className="text-sm font-bold text-white">{f.label}</span>
+                <div
+                  className="relative flex h-24 w-24 items-center justify-center rounded-[28px] border border-white/25"
+                  style={{
+                    background: "linear-gradient(135deg, rgba(255,255,255,0.25) 0%, rgba(255,255,255,0.08) 100%)",
+                    backdropFilter: "blur(12px)",
+                    boxShadow: "0 8px 32px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.2)",
+                  }}
+                >
+                  <motion.span
+                    className="text-5xl"
+                    animate={{ y: [0, -6, 0] }}
+                    transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                  >
+                    🐼
+                  </motion.span>
+                  {/* Sparkle badges */}
+                  <motion.span
+                    className="absolute -top-2 -right-2 text-lg"
+                    animate={{ rotate: [0, 15, -15, 0], scale: [1, 1.2, 1] }}
+                    transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
+                  >
+                    ✨
+                  </motion.span>
+                </div>
               </motion.div>
+
+              <motion.h1
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4, duration: 0.6 }}
+                className="mb-4 text-[2.75rem] font-extrabold leading-[1.1] tracking-tight text-white"
+                style={{ fontFamily: "var(--font-fredoka)" }}
+              >
+                Your AI-Powered
+                <br />
+                <span
+                  style={{
+                    background: "linear-gradient(90deg, #86efac, #fde68a)",
+                    WebkitBackgroundClip: "text",
+                    WebkitTextFillColor: "transparent",
+                  }}
+                >
+                  Study Buddy
+                </span>
+              </motion.h1>
+
+              <motion.p
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.5, duration: 0.6 }}
+                className="text-base leading-relaxed text-green-100/75 font-medium max-w-sm"
+              >
+                Ask any question, get instant step-by-step explanations, and
+                make learning <span className="text-white font-semibold">actually fun</span>.
+              </motion.p>
+            </div>
+
+            {/* Highlight cards */}
+            <motion.div
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.6 }}
+              className="flex flex-col gap-3"
+            >
+              {highlights.map((h, i) => (
+                <motion.div
+                  key={h.title}
+                  initial={{ opacity: 0, x: -15 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.65 + i * 0.08 }}
+                  className="flex items-center gap-4 rounded-2xl border border-white/12 px-4 py-3"
+                  style={{
+                    background: "rgba(255,255,255,0.07)",
+                    backdropFilter: "blur(8px)",
+                  }}
+                >
+                  <span className="text-2xl">{h.emoji}</span>
+                  <div>
+                    <div className="text-sm font-bold text-white">{h.title}</div>
+                    <div className="text-xs text-green-200/70">{h.desc}</div>
+                  </div>
+                </motion.div>
+              ))}
+            </motion.div>
+          </div>
+
+          {/* Stats row */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.9 }}
+            className="flex items-center gap-6"
+          >
+            {stats.map((s, i) => (
+              <div key={i} className="flex flex-col">
+                <div className="flex items-center gap-1">
+                  <span
+                    className="text-2xl font-extrabold text-white"
+                    style={{ fontFamily: "var(--font-fredoka)" }}
+                  >
+                    {s.value}
+                  </span>
+                  {s.icon}
+                </div>
+                <span className="text-xs text-green-200/60 font-medium">{s.label}</span>
+              </div>
             ))}
           </motion.div>
         </div>
-
-        <div className="absolute bottom-0 left-0 right-0 h-20 bg-linear-to-t from-black/20 to-transparent" />
       </motion.div>
 
-      {/* Right: Auth Card */}
+      {/* ── Right: Auth Panel ── */}
       <motion.div
-        initial={{ opacity: 0, x: 40 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.7, ease: "easeOut" }}
-        className="relative isolate flex flex-1 min-h-screen items-center justify-center bg-white px-6 py-12"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5, delay: 0.15 }}
+        className="flex flex-1 flex-col items-center justify-center bg-white px-6 py-14 sm:px-10"
       >
-        <div className="absolute inset-0 bamboo-dots opacity-40 pointer-events-none" />
+        <div className="w-full max-w-[400px]">
+          {/* Mobile logo */}
+          <motion.div
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="mb-10 flex items-center gap-2 lg:hidden"
+          >
+            <span className="text-2xl">🐼</span>
+            <span
+              className="text-lg font-bold text-gray-900"
+              style={{ fontFamily: "var(--font-fredoka)" }}
+            >
+              Learning Panda
+            </span>
+          </motion.div>
 
-        <div className="relative z-10 w-full max-w-md rounded-3xl border border-gray-100 bg-white p-8 shadow-xl shadow-gray-200/50 sm:p-10">
           <AnimatePresence mode="wait">
-            {/* ── Step: method selection ── */}
+            {/* ── Step: method ── */}
             {step === "method" && (
               <motion.div
                 key="method"
-                initial={{ opacity: 0, y: 10 }}
+                initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                transition={{ duration: 0.25 }}
+                exit={{ opacity: 0, y: -12 }}
+                transition={{ duration: 0.22 }}
               >
-                <div className="mb-8 text-center">
-                  <motion.div
-                    animate={{ rotate: [0, 5, -5, 0] }}
-                    transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                    className="mb-3 inline-block text-4xl"
-                  >
-                    👋
-                  </motion.div>
+                {/* Heading */}
+                <div className="mb-8">
                   <h2
-                    className="text-3xl font-extrabold tracking-tight text-gray-900"
+                    className="text-[2rem] font-extrabold tracking-tight text-gray-900 leading-tight"
                     style={{ fontFamily: "var(--font-fredoka)" }}
                   >
-                    Welcome Back!
+                    Welcome back! 👋
                   </h2>
-                  <p className="mt-2 text-base text-gray-500 font-medium">
-                    Sign in to continue your learning journey.
+                  <p className="mt-1.5 text-sm text-gray-400 font-medium">
+                    Sign in to continue your learning adventure.
                   </p>
                 </div>
 
-                {/* Turnstile */}
-                <motion.div
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.2 }}
-                  className="mb-5 flex flex-col items-center gap-2"
-                >
-                  <div className="flex items-center gap-1.5 mb-1 text-xs text-gray-400 font-medium">
+                {/* Bot check */}
+                <div className="mb-6">
+                  <div className="mb-2 flex items-center gap-1.5 text-xs text-gray-400">
                     <ShieldCheck className="h-3.5 w-3.5 text-green-500" />
-                    <span>Quick bot check</span>
+                    <span>Quick security check</span>
                   </div>
                   {siteKey ? (
                     <Turnstile
@@ -339,28 +426,28 @@ export default function LoginSignup() {
                       NEXT_PUBLIC_TURNSTILE_SITE_KEY not set
                     </p>
                   )}
-                </motion.div>
+                </div>
 
                 {error && (
-                  <motion.p
+                  <motion.div
                     initial={{ opacity: 0, y: -4 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="mb-3 text-center text-sm font-semibold text-red-500"
+                    className="mb-4 rounded-xl bg-red-50 border border-red-100 px-4 py-2.5"
                   >
-                    {error}
-                  </motion.p>
+                    <p className="text-sm font-semibold text-red-500">{error}</p>
+                  </motion.div>
                 )}
 
                 <div className="flex flex-col gap-3">
                   {/* Google */}
                   <motion.button
                     type="button"
-                    whileHover={turnstileToken && !verifying ? { scale: 1.02, y: -2 } : {}}
-                    whileTap={turnstileToken && !verifying ? { scale: 0.98 } : {}}
+                    whileHover={turnstileToken && !verifying ? { scale: 1.015 } : {}}
+                    whileTap={turnstileToken && !verifying ? { scale: 0.985 } : {}}
                     onClick={handleGoogleSignIn}
                     disabled={!turnstileToken || verifying}
-                    className="flex w-full items-center justify-center gap-3 rounded-2xl border border-gray-200 bg-white px-4 py-3 text-base font-bold text-gray-700 shadow-sm hover:bg-gray-50 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-                    style={{ fontFamily: "var(--font-fredoka)" }}
+                    className="relative flex w-full items-center justify-center gap-3 rounded-2xl border border-gray-200 bg-white px-4 py-3.5 text-sm font-bold text-gray-700 transition-all hover:border-gray-300 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
+                    style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.06)" }}
                   >
                     {verifying ? (
                       <>
@@ -372,7 +459,7 @@ export default function LoginSignup() {
                       </>
                     ) : (
                       <>
-                        <svg width="22" height="22" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+                        <svg width="20" height="20" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
                           <g>
                             <path fill="#4285F4" d="M24 9.5c3.54 0 6.71 1.22 9.2 3.23l6.9-6.9C35.64 2.36 30.13 0 24 0 14.82 0 6.73 5.82 2.69 14.09l8.06 6.26C12.6 13.6 17.85 9.5 24 9.5z" />
                             <path fill="#34A853" d="M46.1 24.55c0-1.64-.15-3.22-.42-4.74H24v9.01h12.42c-.54 2.9-2.18 5.36-4.65 7.01l7.19 5.6C43.98 37.13 46.1 31.3 46.1 24.55z" />
@@ -381,34 +468,42 @@ export default function LoginSignup() {
                             <path fill="none" d="M0 0h48v48H0z" />
                           </g>
                         </svg>
-                        Sign in with Google
+                        Continue with Google
                       </>
                     )}
                   </motion.button>
 
                   {/* Divider */}
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-3 py-1">
                     <div className="h-px flex-1 bg-gray-100" />
-                    <span className="text-xs text-gray-400 font-medium">or</span>
+                    <span className="text-xs text-gray-300 font-semibold">OR</span>
                     <div className="h-px flex-1 bg-gray-100" />
                   </div>
 
-                  {/* Email OTP — coming soon */}
+                  {/* Email button */}
+                  <motion.button
+                    type="button"
+                    whileHover={turnstileToken && !verifying ? { scale: 1.015 } : {}}
+                    whileTap={turnstileToken && !verifying ? { scale: 0.985 } : {}}
+                    onClick={() => { setError(null); setStep("email-input"); }}
+                    disabled={!turnstileToken || verifying}
+                    className="flex w-full items-center justify-center gap-3 rounded-2xl border border-green-200 bg-green-50 px-4 py-3.5 text-sm font-bold text-green-700 transition-all hover:bg-green-100 hover:border-green-300 disabled:opacity-40 disabled:cursor-not-allowed"
+                  >
+                    <Mail className="h-4.5 w-4.5" />
+                    Continue with Email
+                  </motion.button>
                 </div>
 
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.7 }}
-                  className="mt-8 flex items-center justify-center gap-2 text-xs text-gray-400"
-                >
-                  <span>Made with</span>
-                  <motion.span animate={{ scale: [1, 1.3, 1] }} transition={{ duration: 1.5, repeat: Infinity }}>
-                    💚
-                  </motion.span>
-                  <span>by Learning Panda</span>
-                  <span>🐼</span>
-                </motion.div>
+                <p className="mt-8 text-center text-xs text-gray-300">
+                  By continuing, you agree to our{" "}
+                  <a href="/terms-of-service" className="text-gray-400 underline underline-offset-2 hover:text-gray-600 transition-colors">
+                    Terms
+                  </a>{" "}
+                  &amp;{" "}
+                  <a href="/privacy-policy" className="text-gray-400 underline underline-offset-2 hover:text-gray-600 transition-colors">
+                    Privacy Policy
+                  </a>
+                </p>
               </motion.div>
             )}
 
@@ -419,63 +514,70 @@ export default function LoginSignup() {
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -20 }}
-                transition={{ duration: 0.25 }}
+                transition={{ duration: 0.22 }}
               >
                 <button
                   onClick={() => { setStep("method"); setError(null); }}
-                  className="mb-6 flex items-center gap-1.5 text-sm font-semibold text-gray-400 hover:text-gray-600 transition-colors"
+                  className="mb-7 flex items-center gap-1.5 text-sm font-semibold text-gray-400 hover:text-gray-600 transition-colors"
                 >
                   <ArrowLeft className="h-4 w-4" />
                   Back
                 </button>
 
-                <div className="mb-8 text-center">
-                  <div className="mb-3 inline-block text-4xl">📧</div>
+                <div className="mb-8">
+                  <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-green-50 border border-green-100">
+                    <Mail className="h-5 w-5 text-green-600" />
+                  </div>
                   <h2
-                    className="text-3xl font-extrabold tracking-tight text-gray-900"
+                    className="text-[2rem] font-extrabold tracking-tight text-gray-900 leading-tight"
                     style={{ fontFamily: "var(--font-fredoka)" }}
                   >
                     Enter your email
                   </h2>
-                  <p className="mt-2 text-sm text-gray-500 font-medium">
-                    We&apos;ll send you a 6-digit code to sign in.
+                  <p className="mt-1.5 text-sm text-gray-400 font-medium">
+                    We&apos;ll send you a 6-digit sign-in code.
                   </p>
                 </div>
 
-                <div className="mb-4">
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    onKeyDown={(e) => e.key === "Enter" && handleSendOtp()}
-                    placeholder="you@example.com"
-                    className="w-full rounded-2xl border border-gray-200 px-4 py-3 text-base font-medium text-gray-800 placeholder-gray-300 outline-none focus:border-green-400 focus:ring-2 focus:ring-green-100 transition"
-                    autoFocus
-                  />
+                <div className="mb-4 space-y-2">
+                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide">
+                    Email address
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      onKeyDown={(e) => e.key === "Enter" && handleSendOtp()}
+                      placeholder="you@example.com"
+                      className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3.5 text-sm font-medium text-gray-800 placeholder-gray-300 outline-none transition focus:border-green-400 focus:bg-white focus:ring-3 focus:ring-green-100"
+                      autoFocus
+                    />
+                  </div>
                 </div>
 
                 {error && (
-                  <motion.p
+                  <motion.div
                     initial={{ opacity: 0, y: -4 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="mb-3 text-center text-sm font-semibold text-red-500"
+                    className="mb-4 rounded-xl bg-red-50 border border-red-100 px-4 py-2.5"
                   >
-                    {error}
-                  </motion.p>
+                    <p className="text-sm font-semibold text-red-500">{error}</p>
+                  </motion.div>
                 )}
 
                 <motion.button
                   type="button"
-                  whileHover={email && !sendingOtp ? { scale: 1.02, y: -2 } : {}}
-                  whileTap={email && !sendingOtp ? { scale: 0.98 } : {}}
+                  whileHover={email && !sendingOtp ? { scale: 1.015 } : {}}
+                  whileTap={email && !sendingOtp ? { scale: 0.985 } : {}}
                   onClick={handleSendOtp}
                   disabled={!email || sendingOtp}
-                  className="kids-submit-btn flex w-full items-center justify-center gap-2 rounded-2xl px-4 py-3 text-base font-extrabold text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="kids-submit-btn flex w-full items-center justify-center gap-2 rounded-2xl px-4 py-3.5 text-sm font-extrabold text-white disabled:opacity-50 disabled:cursor-not-allowed"
                   style={{ fontFamily: "var(--font-fredoka)" }}
                 >
                   {sendingOtp ? (
                     <>
-                      <svg className="h-5 w-5 animate-spin" viewBox="0 0 24 24" fill="none">
+                      <svg className="h-4.5 w-4.5 animate-spin" viewBox="0 0 24 24" fill="none">
                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
                       </svg>
@@ -483,46 +585,51 @@ export default function LoginSignup() {
                     </>
                   ) : (
                     <>
-                      <Mail className="h-5 w-5" />
                       Send Code
+                      <ArrowRight className="h-4 w-4" />
                     </>
                   )}
                 </motion.button>
               </motion.div>
             )}
 
-            {/* ── Step: OTP input ── */}
+            {/* ── Step: OTP ── */}
             {step === "otp-input" && (
               <motion.div
                 key="otp-input"
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -20 }}
-                transition={{ duration: 0.25 }}
+                transition={{ duration: 0.22 }}
               >
                 <button
                   onClick={() => { setStep("email-input"); setError(null); setOtp(""); }}
-                  className="mb-6 flex items-center gap-1.5 text-sm font-semibold text-gray-400 hover:text-gray-600 transition-colors"
+                  className="mb-7 flex items-center gap-1.5 text-sm font-semibold text-gray-400 hover:text-gray-600 transition-colors"
                 >
                   <ArrowLeft className="h-4 w-4" />
                   Back
                 </button>
 
-                <div className="mb-8 text-center">
-                  <div className="mb-3 inline-block text-4xl">🔐</div>
+                <div className="mb-8">
+                  <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-green-50 border border-green-100">
+                    <span className="text-2xl">🔐</span>
+                  </div>
                   <h2
-                    className="text-3xl font-extrabold tracking-tight text-gray-900"
+                    className="text-[2rem] font-extrabold tracking-tight text-gray-900 leading-tight"
                     style={{ fontFamily: "var(--font-fredoka)" }}
                   >
-                    Check your email
+                    Check your inbox
                   </h2>
-                  <p className="mt-2 text-sm text-gray-500 font-medium">
-                    We sent a 6-digit code to
+                  <p className="mt-1.5 text-sm text-gray-400 font-medium">
+                    We sent a 6-digit code to{" "}
+                    <span className="font-bold text-green-600">{email}</span>
                   </p>
-                  <p className="text-sm font-bold text-green-600 mt-0.5">{email}</p>
                 </div>
 
-                <div className="mb-4">
+                <div className="mb-4 space-y-2">
+                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide">
+                    6-digit code
+                  </label>
                   <input
                     type="text"
                     inputMode="numeric"
@@ -531,33 +638,33 @@ export default function LoginSignup() {
                     onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))}
                     onKeyDown={(e) => e.key === "Enter" && otp.length === 6 && handleVerifyOtp()}
                     placeholder="000000"
-                    className="w-full rounded-2xl border border-gray-200 px-4 py-4 text-center text-3xl font-extrabold tracking-[0.4em] text-gray-800 placeholder-gray-200 outline-none focus:border-green-400 focus:ring-2 focus:ring-green-100 transition"
+                    className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-4 text-center text-3xl font-extrabold tracking-[0.5em] text-gray-800 placeholder-gray-200 outline-none transition focus:border-green-400 focus:bg-white focus:ring-3 focus:ring-green-100"
                     autoFocus
                   />
                 </div>
 
                 {error && (
-                  <motion.p
+                  <motion.div
                     initial={{ opacity: 0, y: -4 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="mb-3 text-center text-sm font-semibold text-red-500"
+                    className="mb-4 rounded-xl bg-red-50 border border-red-100 px-4 py-2.5"
                   >
-                    {error}
-                  </motion.p>
+                    <p className="text-sm font-semibold text-red-500">{error}</p>
+                  </motion.div>
                 )}
 
                 <motion.button
                   type="button"
-                  whileHover={otp.length === 6 && !signingIn ? { scale: 1.02, y: -2 } : {}}
-                  whileTap={otp.length === 6 && !signingIn ? { scale: 0.98 } : {}}
+                  whileHover={otp.length === 6 && !signingIn ? { scale: 1.015 } : {}}
+                  whileTap={otp.length === 6 && !signingIn ? { scale: 0.985 } : {}}
                   onClick={handleVerifyOtp}
                   disabled={otp.length !== 6 || signingIn}
-                  className="kids-submit-btn flex w-full items-center justify-center gap-2 rounded-2xl px-4 py-3 text-base font-extrabold text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="kids-submit-btn flex w-full items-center justify-center gap-2 rounded-2xl px-4 py-3.5 text-sm font-extrabold text-white disabled:opacity-50 disabled:cursor-not-allowed"
                   style={{ fontFamily: "var(--font-fredoka)" }}
                 >
                   {signingIn ? (
                     <>
-                      <svg className="h-5 w-5 animate-spin" viewBox="0 0 24 24" fill="none">
+                      <svg className="h-4.5 w-4.5 animate-spin" viewBox="0 0 24 24" fill="none">
                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
                       </svg>
@@ -565,14 +672,14 @@ export default function LoginSignup() {
                     </>
                   ) : (
                     <>
-                      <Sparkles className="h-5 w-5" />
-                      Verify Code
+                      <Sparkles className="h-4 w-4" />
+                      Verify &amp; Sign In
                     </>
                   )}
                 </motion.button>
 
                 <div className="mt-5 flex items-center justify-center gap-2">
-                  <span className="text-sm text-gray-400">Didn&apos;t get it?</span>
+                  <span className="text-sm text-gray-400">Didn&apos;t receive it?</span>
                   <button
                     onClick={handleResendOtp}
                     disabled={resendCooldown > 0 || sendingOtp}

@@ -26,6 +26,7 @@ export default async function SettingsPage() {
   // Map backend snake_case → camelCase expected by SettingsClient
   return (
     <SettingsClient
+      questionsAsked={u.questions_asked ?? 0}
       user={{
         id: u.id,
         name: u.name,
@@ -43,6 +44,7 @@ export default async function SettingsPage() {
         courses: u.courses ?? [],
         aiTutor: null,
         createdAt: u.created_at,
+        current_streak: u.current_streak ?? 0,
       }}
     />
   );
