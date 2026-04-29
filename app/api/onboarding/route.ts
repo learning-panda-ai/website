@@ -29,6 +29,7 @@ export async function POST(request: Request) {
       parent_mobile: body.parentMobile,
       parent_email: body.parentEmail,
       grade: body.grade,
+      school_board: body.schoolBoard,
       courses: body.courses,
       favorite_subject: body.favoriteSubject,
       study_feeling: body.studyFeeling,

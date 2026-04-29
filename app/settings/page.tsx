@@ -14,19 +14,26 @@ export const metadata: Metadata = {
 export default async function SettingsPage() {
   const token = await requireAuth();
 
-  const res = await fetch(`${BACKEND_URL}/api/v1/auth/me`, {
-    headers: { Authorization: `Bearer ${token}` },
-    cache: "no-store",
-  });
+  const [meRes, sessionsRes] = await Promise.all([
+    fetch(`${BACKEND_URL}/api/v1/auth/me`, {
+      headers: { Authorization: `Bearer ${token}` },
+      cache: "no-store",
+    }),
+    fetch(`${BACKEND_URL}/api/v1/chat/sessions`, {
+      headers: { Authorization: `Bearer ${token}` },
+      cache: "no-store",
+    }),
+  ]);
 
-  if (!res.ok) redirect("/login");
+  if (!meRes.ok) redirect("/login");
 
-  const u = await res.json();
+  const u = await meRes.json();
+  const sessions = sessionsRes.ok ? await sessionsRes.json() : [];
+  const questionsAsked = Array.isArray(sessions) ? sessions.length : 0;
 
-  // Map backend snake_case → camelCase expected by SettingsClient
   return (
     <SettingsClient
-      questionsAsked={u.questions_asked ?? 0}
+      questionsAsked={questionsAsked}
       user={{
         id: u.id,
         name: u.name,
@@ -42,7 +49,6 @@ export default async function SettingsPage() {
         parentMobile: u.parent_mobile,
         parentEmail: u.parent_email,
         courses: u.courses ?? [],
-        aiTutor: null,
         createdAt: u.created_at,
         current_streak: u.current_streak ?? 0,
       }}

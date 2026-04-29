@@ -234,7 +234,9 @@ export default function AskTab({ mode, grade, enrolledCourses, currentStreak, us
             />
           )}
           {activeMode === "video" && <VideoChatUI key="video" />}
-          {activeMode === "audio" && <AudioChatUI key="audio" />}
+          {activeMode === "audio" && (
+            <AudioChatUI key="audio" subject={subject} className={className} />
+          )}
         </div>
 
         {/* ── History sidebar (text mode, lg+) ── */}

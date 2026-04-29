@@ -1,5 +1,13 @@
 import type { OnboardingOption } from "@/types/onboarding";
 
+export const SCHOOL_BOARDS: OnboardingOption[] = [
+  { id: "CBSE",        label: "CBSE",        emoji: "🏫" },
+  { id: "ICSE",        label: "ICSE",        emoji: "🎓" },
+  { id: "IGCSE",       label: "IGCSE",       emoji: "🌐" },
+  { id: "IB",          label: "IB",          emoji: "🌍" },
+  { id: "State Board", label: "State Board", emoji: "📋" },
+];
+
 export const CLASS_EMOJI: Record<string, string> = {
   "Class 1":  "🌱", "Class 2":  "🌿", "Class 3":  "🍀", "Class 4":  "🌻",
   "Class 5":  "⭐", "Class 6":  "🌟", "Class 7":  "🔥", "Class 8":  "💫",

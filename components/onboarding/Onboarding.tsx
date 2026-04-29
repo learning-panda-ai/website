@@ -11,7 +11,7 @@ import {
 import BasicDetails from "@/components/onboarding/BasicDetails";
 import type { BasicDetailsData, OnboardingOptions, OnboardingOption } from "@/types/onboarding";
 import {
-  CLASS_EMOJI, SUBJECT_EMOJI,
+  CLASS_EMOJI, SUBJECT_EMOJI, SCHOOL_BOARDS,
   FAVORITE_SUBJECTS, STUDY_FEELINGS, CAREER_OPTIONS, STRENGTHS_OPTIONS,
   FLOATING_ITEMS,
 } from "@/data/onboarding";
@@ -41,8 +41,10 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
   });
   const [options, setOptions] = useState<OnboardingOptions>({ classes: [], subjects_by_class: {} });
   const [optionsLoading, setOptionsLoading] = useState(true);
+  const [subjectsLoading, setSubjectsLoading] = useState(false);
   // selectedGrade stores the API label e.g. "Class 10"; converted to "class-10" on submit
   const [selectedGrade, setSelectedGrade] = useState<string | null>(null);
+  const [selectedBoard, setSelectedBoard] = useState<string | null>(null);
   const [selectedCourses, setSelectedCourses] = useState<string[]>([]);
   const [favoriteSubject, setFavoriteSubject] = useState<string | null>(null);
   const [studyFeeling, setStudyFeeling] = useState<string | null>(null);
@@ -57,6 +59,20 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
       .catch(() => setOptions({ classes: [], subjects_by_class: {} }))
       .finally(() => setOptionsLoading(false));
   }, []);
+
+  // Re-fetch subjects filtered by board whenever the board changes
+  useEffect(() => {
+    if (!selectedBoard) return;
+    setSubjectsLoading(true);
+    fetch(`/api/user/onboarding-options?board=${encodeURIComponent(selectedBoard)}`)
+      .then((r) => (r.ok ? r.json() : { classes: [], subjects_by_class: {} }))
+      .then((data: OnboardingOptions) => {
+        setOptions((prev) => ({ ...prev, subjects_by_class: data.subjects_by_class }));
+        setSelectedCourses([]); // subjects changed, reset selection
+      })
+      .catch(() => {})
+      .finally(() => setSubjectsLoading(false));
+  }, [selectedBoard]);
 
   const availableSubjects = selectedGrade ? (options.subjects_by_class[selectedGrade] ?? []) : [];
 
@@ -88,7 +104,7 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
 
   const canContinue = () => {
     if (step === 0) return isBasicDetailsComplete();
-    if (step === 1) return selectedGrade !== null;
+    if (step === 1) return selectedGrade !== null && selectedBoard !== null && !subjectsLoading;
     if (step === 2) return selectedCourses.length >= 1;
     if (step === 3) return isAboutYouComplete();
     return false;
@@ -104,6 +120,7 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
         body: JSON.stringify({
           ...basicDetails,
           grade: selectedGrade ? classLabelToId(selectedGrade) : selectedGrade,
+          schoolBoard: selectedBoard,
           courses: selectedCourses,
           favoriteSubject,
           studyFeeling,
@@ -121,10 +138,10 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
 
 
   const progressSteps = [
-    { label: "Details",  done: isBasicDetailsComplete() },
-    { label: "Grade",    done: selectedGrade !== null },
-    { label: "Courses",  done: selectedCourses.length >= 1 },
-    { label: "About You", done: isAboutYouComplete() },
+    { label: "Details",      done: isBasicDetailsComplete() },
+    { label: "Grade & Board", done: selectedGrade !== null && selectedBoard !== null },
+    { label: "Courses",      done: selectedCourses.length >= 1 },
+    { label: "About You",    done: isAboutYouComplete() },
   ];
 
   return (
@@ -277,6 +294,40 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
                 </div>
               )}
 
+              {/* Board selection */}
+              <div className="mt-8 border-t-2 border-green-100 pt-6">
+                <div className="mb-3 flex items-center gap-2">
+                  <span className="text-base">🏛️</span>
+                  <span className="text-xs font-bold uppercase tracking-wider text-green-600" style={{ fontFamily: "var(--font-fredoka)" }}>Which school board do you follow?</span>
+                  {selectedBoard && (
+                    <motion.span initial={{ scale: 0 }} animate={{ scale: 1 }} className="ml-auto flex h-5 w-5 items-center justify-center rounded-full bg-green-500">
+                      <CheckCircle2 className="h-3 w-3 text-white" />
+                    </motion.span>
+                  )}
+                </div>
+                <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                  {SCHOOL_BOARDS.map((board) => {
+                    const sel = selectedBoard === board.id;
+                    return (
+                      <motion.button
+                        key={board.id}
+                        whileHover={{ scale: 1.05, y: -2 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => setSelectedBoard(board.id)}
+                        className={`flex flex-col items-center gap-1.5 rounded-2xl border-2 px-3 py-4 text-center transition-all ${
+                          sel
+                            ? "border-blue-400 bg-blue-50 shadow-md shadow-blue-200/50"
+                            : "border-green-100 bg-white hover:border-blue-200 hover:bg-blue-50/40"
+                        }`}
+                      >
+                        <span className="text-2xl">{board.emoji}</span>
+                        <span className={`text-sm font-extrabold ${sel ? "text-blue-700" : "text-green-600"}`} style={{ fontFamily: "var(--font-fredoka)" }}>{board.label}</span>
+                      </motion.button>
+                    );
+                  })}
+                </div>
+              </div>
+
             </motion.section>
           )}
 
@@ -307,7 +358,12 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
                 )}
               </div>
 
-              {availableSubjects.length === 0 ? (
+              {subjectsLoading ? (
+                <div className="flex items-center justify-center py-12 gap-2 text-green-600">
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                  <span className="text-sm font-medium">Loading subjects…</span>
+                </div>
+              ) : availableSubjects.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-12 text-center gap-2">
                   <span className="text-4xl">📖</span>
                   <p className="text-sm font-bold text-gray-500">No subjects available for {selectedGrade}</p>

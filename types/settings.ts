@@ -15,7 +15,6 @@ export type UserProp = {
   parentMobile: string | null;
   parentEmail: string | null;
   courses: string[];
-  aiTutor: string | null;
   createdAt: string;
   current_streak?: number;
 };

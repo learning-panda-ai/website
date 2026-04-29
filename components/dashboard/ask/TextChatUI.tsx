@@ -154,6 +154,14 @@ export default function TextChatUI({
         body: JSON.stringify({ message: userMsg, class_name: className, subject, history }),
       });
 
+      if (res.status === 401) {
+        setMessages((prev) => {
+          const updated = [...prev];
+          updated[updated.length - 1] = { from: "panda", text: "Please sign in to continue." };
+          return updated;
+        });
+        return;
+      }
       if (!res.ok) throw new Error(`Request failed: ${res.status}`);
 
       const reader = res.body!.getReader();
@@ -276,69 +284,67 @@ export default function TextChatUI({
             {messages.map((msg, i) => (
               <div
                 key={i}
-                className={`flex items-end gap-3 ${msg.from === "user" ? "flex-row-reverse" : ""}`}
+                className={`flex flex-col gap-2 ${msg.from === "user" ? "items-end" : "items-start"}`}
               >
-                {/* Avatar */}
+                {/* Bubble */}
                 <div
-                  className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 self-end text-lg ${
-                    msg.from === "panda"
-                      ? "bg-[#C8E6C9]"
-                      : "bg-[#43A047]"
+                  className={`text-sm leading-relaxed px-5 py-4 rounded-2xl ${
+                    msg.from === "user"
+                      ? "max-w-[65%] bg-[#43A047] text-white shadow-sm"
+                      : "max-w-[88%] bg-white border border-[#E8E4D9] text-[#1B1C17] shadow-sm"
                   }`}
                 >
-                  {msg.from === "panda" ? "🐼" : "👤"}
+                  {msg.from === "user" ? (
+                    <p className="whitespace-pre-wrap">{msg.text}</p>
+                  ) : msg.text ? (
+                    <ReactMarkdown
+                      components={{
+                        p:          ({ children }) => <p className="mb-1.5 last:mb-0">{children}</p>,
+                        strong:     ({ children }) => <strong className="font-bold text-[#1B5E20]">{children}</strong>,
+                        em:         ({ children }) => <em className="italic text-[#44483D]">{children}</em>,
+                        ul:         ({ children }) => <ul className="list-disc pl-4 mb-1.5 space-y-1">{children}</ul>,
+                        ol:         ({ children }) => <ol className="list-decimal pl-4 mb-1.5 space-y-1">{children}</ol>,
+                        li:         ({ children }) => <li className="leading-snug">{children}</li>,
+                        code:       ({ children, className: cc }) =>
+                          cc ? (
+                            <pre className="bg-[#F0EDE4] border-l-4 border-[#43A047] rounded-r-xl pl-4 pr-3 py-3 my-2 overflow-x-auto text-xs font-mono">
+                              <code>{children}</code>
+                            </pre>
+                          ) : (
+                            <code className="bg-[#C8E6C9]/60 text-[#1B5E20] rounded px-1.5 py-0.5 text-xs font-mono">{children}</code>
+                          ),
+                        h1:         ({ children }) => <h1 className="font-bold text-base mb-1.5 text-[#1B5E20]" style={{ fontFamily: "var(--font-fredoka)" }}>{children}</h1>,
+                        h2:         ({ children }) => <h2 className="font-bold text-sm mb-1 text-[#1B5E20]" style={{ fontFamily: "var(--font-fredoka)" }}>{children}</h2>,
+                        h3:         ({ children }) => <h3 className="font-semibold mb-0.5 text-[#1B1C17]">{children}</h3>,
+                        blockquote: ({ children }) => (
+                          <blockquote className="border-l-4 border-[#43A047] bg-[#C8E6C9]/20 pl-3 pr-2 py-2 my-2 rounded-r-xl text-[#44483D] italic">
+                            {children}
+                          </blockquote>
+                        ),
+                      }}
+                    >
+                      {msg.text}
+                    </ReactMarkdown>
+                  ) : isStreaming && i === messages.length - 1 ? (
+                    /* Typing indicator */
+                    <span className="flex gap-1.5 items-center py-0.5">
+                      <span className="h-2 w-2 rounded-full bg-[#43A047] animate-bounce" style={{ animationDelay: "0ms" }} />
+                      <span className="h-2 w-2 rounded-full bg-[#43A047] animate-bounce" style={{ animationDelay: "160ms" }} />
+                      <span className="h-2 w-2 rounded-full bg-[#43A047] animate-bounce" style={{ animationDelay: "320ms" }} />
+                    </span>
+                  ) : null}
                 </div>
 
-                {/* Bubble */}
-                <div className={`flex flex-col gap-1 ${msg.from === "user" ? "items-end" : "items-start"}`}>
+                {/* Avatar + label — below the bubble */}
+                <div className={`flex items-center gap-2 ${msg.from === "user" ? "flex-row-reverse" : ""}`}>
                   <div
-                    className={`max-w-[72%] lg:max-w-[62%] text-sm leading-relaxed px-5 py-4 shadow-sm ${
-                      msg.from === "user"
-                        ? "bg-[#43A047] text-white rounded-2xl rounded-tr-none"
-                        : "bg-white border border-[#C8E6C9] text-[#1B1C17] rounded-2xl rounded-tl-none"
+                    className={`w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 text-base border-2 border-white shadow-sm ${
+                      msg.from === "panda" ? "bg-[#C8E6C9]" : "bg-[#43A047]"
                     }`}
                   >
-                    {msg.from === "user" ? (
-                      <p className="whitespace-pre-wrap">{msg.text}</p>
-                    ) : msg.text ? (
-                      <ReactMarkdown
-                        components={{
-                          p:          ({ children }) => <p className="mb-1.5 last:mb-0">{children}</p>,
-                          strong:     ({ children }) => <strong className="font-bold text-[#1B5E20]">{children}</strong>,
-                          em:         ({ children }) => <em className="italic text-[#44483D]">{children}</em>,
-                          ul:         ({ children }) => <ul className="list-disc pl-4 mb-1.5 space-y-1">{children}</ul>,
-                          ol:         ({ children }) => <ol className="list-decimal pl-4 mb-1.5 space-y-1">{children}</ol>,
-                          li:         ({ children }) => <li className="leading-snug">{children}</li>,
-                          code:       ({ children, className: cc }) =>
-                            cc ? (
-                              <pre className="bg-[#F0EDE4] border-l-4 border-[#43A047] rounded-r-xl pl-4 pr-3 py-3 my-2 overflow-x-auto text-xs font-mono">
-                                <code>{children}</code>
-                              </pre>
-                            ) : (
-                              <code className="bg-[#C8E6C9]/40 text-[#1B5E20] rounded px-1.5 py-0.5 text-xs font-mono">{children}</code>
-                            ),
-                          h1:         ({ children }) => <h1 className="font-bold text-base mb-1.5 text-[#1B5E20]" style={{ fontFamily: "var(--font-fredoka)" }}>{children}</h1>,
-                          h2:         ({ children }) => <h2 className="font-bold text-sm mb-1 text-[#1B5E20]" style={{ fontFamily: "var(--font-fredoka)" }}>{children}</h2>,
-                          h3:         ({ children }) => <h3 className="font-semibold mb-0.5 text-[#1B1C17]">{children}</h3>,
-                          blockquote: ({ children }) => (
-                            <blockquote className="border-l-4 border-[#43A047] bg-[#C8E6C9]/20 pl-3 pr-2 py-2 my-2 rounded-r-xl text-[#44483D] italic">
-                              {children}
-                            </blockquote>
-                          ),
-                        }}
-                      >
-                        {msg.text}
-                      </ReactMarkdown>
-                    ) : isStreaming && i === messages.length - 1 ? (
-                      /* Typing indicator */
-                      <span className="flex gap-1.5 items-center py-0.5">
-                        <span className="h-2 w-2 rounded-full bg-[#43A047] animate-bounce" style={{ animationDelay: "0ms" }} />
-                        <span className="h-2 w-2 rounded-full bg-[#43A047] animate-bounce" style={{ animationDelay: "160ms" }} />
-                        <span className="h-2 w-2 rounded-full bg-[#43A047] animate-bounce" style={{ animationDelay: "320ms" }} />
-                      </span>
-                    ) : null}
+                    {msg.from === "panda" ? "🐼" : "👤"}
                   </div>
-                  <span className="text-[10px] font-bold text-[#75796C] px-1">
+                  <span className="text-[11px] font-semibold text-[#75796C]">
                     {msg.from === "panda" ? "Panda" : "You"}
                   </span>
                 </div>
@@ -350,8 +356,8 @@ export default function TextChatUI({
       </div>
 
       {/* ── Input bar ──────────────────────────────────────────── */}
-      <div className="shrink-0 px-5 lg:px-8 py-5 border-t border-[#43A047]/5 bg-[#FDFBF7]/80 backdrop-blur-sm">
-        <div className="max-w-3xl mx-auto bg-white rounded-2xl shadow-[0_4px_24px_rgba(67,160,71,0.12)] p-1.5 flex items-center gap-2 focus-within:ring-2 focus-within:ring-[#43A047]/20 transition-all">
+      <div className="shrink-0 px-5 lg:px-8 py-4 border-t border-[#E8E4D9] bg-white">
+        <div className="max-w-3xl mx-auto bg-white border border-[#E8E4D9] rounded-2xl p-1.5 flex items-center gap-2 focus-within:border-[#43A047]/40 focus-within:shadow-sm transition-all">
           {/* Subject chip */}
           <span className="shrink-0 bg-[#C8E6C9] text-[#1B5E20] text-[11px] font-bold px-3 py-1.5 rounded-full whitespace-nowrap ml-1">
             {subject || "No subject"}
@@ -365,18 +371,22 @@ export default function TextChatUI({
             onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && handleSend()}
             placeholder={isStreaming ? "Panda is thinking…" : "Type your question here…"}
             disabled={isStreaming || isLoadingHistory}
-            className="flex-1 border-none focus:ring-0 bg-transparent text-sm text-[#1B1C17] placeholder:text-[#75796C] font-medium outline-none disabled:opacity-50 px-2"
+            className="flex-1 border-none focus:ring-0 bg-transparent text-sm text-[#1B1C17] placeholder:text-[#9E9E9E] font-medium outline-none disabled:opacity-50 px-2"
           />
 
           <button
             onClick={handleSend}
             disabled={!input.trim() || isStreaming || isLoadingHistory}
-            className="h-10 w-10 rounded-xl bg-[#43A047] hover:bg-[#388E3C] active:scale-95 disabled:bg-[#E8E4D9] disabled:text-[#75796C] text-white flex items-center justify-center flex-shrink-0 transition-all shadow-md shadow-[#43A047]/20 disabled:shadow-none"
+            className={`h-9 w-9 rounded-full flex items-center justify-center flex-shrink-0 transition-all active:scale-95 ${
+              input.trim() && !isStreaming
+                ? "bg-[#43A047] text-white shadow-sm hover:bg-[#388E3C]"
+                : "bg-[#F0EDE4] text-[#BDBDBD]"
+            }`}
           >
             <Send className="h-4 w-4" />
           </button>
         </div>
-        <p className="text-center text-[10px] text-[#75796C] mt-2">
+        <p className="text-center text-[10px] text-[#9E9E9E] mt-2">
           Panda can make mistakes — always verify important answers
         </p>
       </div>

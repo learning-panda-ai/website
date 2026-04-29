@@ -162,7 +162,7 @@ export default function ProfileTab({ user }: { user: UserProp }) {
                 <Field label="Educational Board">
                   <SelectInput value={form.schoolBoard} onChange={set("schoolBoard")}>
                     <option value="">Select board</option>
-                    {["CBSE (India)", "ICSE", "IGCSE", "IB", "State Board", "Other"].map((b) => (
+                    {["CBSE", "ICSE", "IGCSE", "IB", "State Board"].map((b) => (
                       <option key={b} value={b}>{b}</option>
                     ))}
                   </SelectInput>
