@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { BarChart2, Calendar, Send } from "lucide-react";
+import { Calendar, Send } from "lucide-react";
 
 interface DashboardRightPanelProps {
   weekActivity: boolean[];
@@ -20,6 +20,7 @@ export default function DashboardRightPanel({
 }: DashboardRightPanelProps) {
   const router = useRouter();
   const [question, setQuestion] = useState("");
+  const [view, setView] = useState<"weekly" | "monthly">("weekly");
 
   const BASE_HEIGHTS = [55, 70, 85, 60, 75, 40, 90];
   const barHeights = DAYS.map((_, i) => {
@@ -27,6 +28,16 @@ export default function DashboardRightPanel({
     if (i === todayIndex) return 20;
     return 15;
   });
+
+  // Monthly grid: 4 rows (row 0 = oldest) × 7 cols (col 0 = Mon)
+  // daysAgo = (3 - row) * 7 + (todayIndex - col)
+  function getDayStatus(row: number, col: number): "today" | "active" | "future" | "inactive" {
+    const daysAgo = (3 - row) * 7 + (todayIndex - col);
+    if (daysAgo < 0) return "future";
+    if (daysAgo === 0) return "today";
+    if (daysAgo < currentStreak) return "active";
+    return "inactive";
+  }
 
   function handleAsk(e: React.FormEvent) {
     e.preventDefault();
@@ -46,40 +57,104 @@ export default function DashboardRightPanel({
           >
             Activity Pulse
           </h4>
-          <BarChart2 className="h-5 w-5 text-[#43A047]" />
-        </div>
-        <div className="flex items-end justify-between h-28 gap-1.5 mb-3">
-          {DAYS.map((day, i) => {
-            const isActive = weekActivity[i];
-            const isToday = i === todayIndex;
-            const height = barHeights[i];
-            return (
-              <div
-                key={day}
-                className={`w-full rounded-t-lg transition-all ${
-                  isToday
-                    ? "bg-[#43A047]"
-                    : isActive
-                    ? "bg-[#43A047]/50"
-                    : "bg-[#43A047]/20"
-                }`}
-                style={{ height: `${height}%` }}
-              />
-            );
-          })}
-        </div>
-        <div className="flex justify-between">
-          {DAYS.map((day, i) => (
-            <span
-              key={day}
-              className={`text-[10px] font-bold uppercase tracking-tighter ${
-                i === todayIndex ? "text-[#43A047]" : "text-[#75796C]"
+          <div className="flex items-center bg-white rounded-full p-0.5 shadow-sm">
+            <button
+              onClick={() => setView("weekly")}
+              className={`px-3 py-1 rounded-full text-xs font-bold transition-all ${
+                view === "weekly"
+                  ? "bg-[#43A047] text-white shadow-sm"
+                  : "text-[#75796C] hover:text-[#44483D]"
               }`}
             >
-              {day}
-            </span>
-          ))}
+              Week
+            </button>
+            <button
+              onClick={() => setView("monthly")}
+              className={`px-3 py-1 rounded-full text-xs font-bold transition-all ${
+                view === "monthly"
+                  ? "bg-[#43A047] text-white shadow-sm"
+                  : "text-[#75796C] hover:text-[#44483D]"
+              }`}
+            >
+              Month
+            </button>
+          </div>
         </div>
+
+        {view === "weekly" ? (
+          <>
+            <div className="flex items-end justify-between h-28 gap-1.5 mb-3">
+              {DAYS.map((day, i) => {
+                const isActive = weekActivity[i];
+                const isToday = i === todayIndex;
+                const height = barHeights[i];
+                return (
+                  <div
+                    key={day}
+                    className={`w-full rounded-t-lg transition-all ${
+                      isToday
+                        ? "bg-[#43A047]"
+                        : isActive
+                        ? "bg-[#43A047]/50"
+                        : "bg-[#43A047]/20"
+                    }`}
+                    style={{ height: `${height}%` }}
+                  />
+                );
+              })}
+            </div>
+            <div className="flex justify-between">
+              {DAYS.map((day, i) => (
+                <span
+                  key={day}
+                  className={`text-[10px] font-bold uppercase tracking-tighter ${
+                    i === todayIndex ? "text-[#43A047]" : "text-[#75796C]"
+                  }`}
+                >
+                  {day}
+                </span>
+              ))}
+            </div>
+          </>
+        ) : (
+          <>
+            <div className="flex flex-col gap-1.5">
+              {[0, 1, 2, 3].map((row) => (
+                <div key={row} className="flex gap-1.5 h-7">
+                  {DAYS.map((_, col) => {
+                    const status = getDayStatus(row, col);
+                    return (
+                      <div
+                        key={col}
+                        className={`flex-1 rounded-md transition-all ${
+                          status === "today"
+                            ? "bg-[#43A047]"
+                            : status === "active"
+                            ? "bg-[#43A047]/60"
+                            : status === "future"
+                            ? "bg-[#43A047]/10"
+                            : "bg-[#43A047]/20"
+                        }`}
+                      />
+                    );
+                  })}
+                </div>
+              ))}
+            </div>
+            <div className="flex justify-between mt-2">
+              {DAYS.map((day, i) => (
+                <span
+                  key={day}
+                  className={`text-[10px] font-bold uppercase tracking-tighter ${
+                    i === todayIndex ? "text-[#43A047]" : "text-[#75796C]"
+                  }`}
+                >
+                  {day}
+                </span>
+              ))}
+            </div>
+          </>
+        )}
       </div>
 
       {/* Up Next */}

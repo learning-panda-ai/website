@@ -2,19 +2,18 @@
 
 import { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Mic, MicOff, PhoneOff, Volume2, VolumeX, Loader2 } from "lucide-react";
+import { Mic, Volume2, Loader2 } from "lucide-react";
 
 interface AudioChatUIProps {
   subject: string;
   className: string;
 }
 
-// Phases of a single conversation turn
 type VoicePhase =
-  | "listening"      // waiting for user to speak
-  | "user_speaking"  // user is actively speaking (RMS above threshold)
-  | "processing"     // user stopped — Gemini is thinking
-  | "panda_speaking"; // receiving + playing Gemini audio
+  | "listening"
+  | "user_speaking"
+  | "processing"
+  | "panda_speaking";
 
 type CallState = "idle" | "connecting" | "live" | "error";
 
@@ -22,8 +21,9 @@ const BACKEND_WS_URL = (process.env.NEXT_PUBLIC_BACKEND_URL ?? "http://localhost
   .replace(/^https/, "wss")
   .replace(/^http/, "ws");
 
-const SPEECH_RMS_THRESHOLD = 0.018; // below this = silence
-const SILENCE_BEFORE_PROCESSING_MS = 1400; // silence gap that ends user turn
+const SPEECH_RMS_THRESHOLD = 0.018;
+const SILENCE_BEFORE_PROCESSING_MS = 1400;
+const WAVE_BARS = 18;
 
 function f32ToI16(f32: Float32Array): ArrayBuffer {
   const i16 = new Int16Array(f32.length);
@@ -49,13 +49,12 @@ function computeRMS(f32: Float32Array): number {
 export default function AudioChatUI({ subject, className }: AudioChatUIProps) {
   const [callState, setCallState] = useState<CallState>("idle");
   const [voicePhase, setVoicePhaseState] = useState<VoicePhase>("listening");
-  const [muted, setMuted] = useState(false);
-  const [speakerOn, setSpeakerOn] = useState(true);
   const [errorMsg, setErrorMsg] = useState("");
 
-  // Refs so onaudioprocess callbacks always see current values
   const voicePhaseRef = useRef<VoicePhase>("listening");
-  const mutedRef = useRef(false);
+  // Tracks live mic RMS — updated in audio processor, read in RAF loop (no re-renders)
+  const currentRMSRef = useRef(0);
+  const waveBarRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   const wsRef = useRef<WebSocket | null>(null);
   const inputCtxRef = useRef<AudioContext | null>(null);
@@ -64,19 +63,15 @@ export default function AudioChatUI({ subject, className }: AudioChatUIProps) {
   const outputCtxRef = useRef<AudioContext | null>(null);
   const nextPlayTimeRef = useRef(0);
 
-  // VAD tracking
   const hasSpeechRef = useRef(false);
   const silenceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  // Inactivity: if Gemini sends no audio for a while, switch back to listening
   const pandaActivityTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Keep voicePhaseRef in sync and update React state together
   const setVoicePhase = useCallback((phase: VoicePhase) => {
     voicePhaseRef.current = phase;
     setVoicePhaseState(phase);
   }, []);
 
-  // ── Cleanup ────────────────────────────────────────────────────────────────
   const teardown = useCallback(() => {
     wsRef.current?.close();
     wsRef.current = null;
@@ -91,15 +86,53 @@ export default function AudioChatUI({ subject, className }: AudioChatUIProps) {
     if (silenceTimerRef.current) clearTimeout(silenceTimerRef.current);
     if (pandaActivityTimerRef.current) clearTimeout(pandaActivityTimerRef.current);
     hasSpeechRef.current = false;
+    currentRMSRef.current = 0;
   }, []);
 
   useEffect(() => () => teardown(), [teardown]);
 
-  // ── Play one PCM16 chunk from Gemini ──────────────────────────────────────
+  // RAF loop: animates waveform bars directly via DOM — zero React re-renders
+  useEffect(() => {
+    if (callState !== "live") return;
+    let rafId: number;
+
+    function tick() {
+      const phase = voicePhaseRef.current;
+      const rms = currentRMSRef.current;
+      const t = Date.now();
+
+      waveBarRefs.current.forEach((bar, i) => {
+        if (!bar) return;
+        let scale: number;
+        let opacity: string;
+
+        if (phase === "user_speaking") {
+          const variation = Math.abs(Math.sin(t * 0.004 + i * 1.1));
+          scale = 0.15 + Math.min(rms * 9, 0.85) * (0.55 + variation * 0.45);
+          opacity = "1";
+        } else if (phase === "listening") {
+          scale = 0.08 + Math.abs(Math.sin(t * 0.0012 + i * 0.65)) * 0.1;
+          opacity = "0.45";
+        } else {
+          scale = 0.06;
+          opacity = "0.2";
+        }
+
+        bar.style.transform = `scaleY(${Math.max(0.05, Math.min(1, scale))})`;
+        bar.style.opacity = opacity;
+      });
+
+      rafId = requestAnimationFrame(tick);
+    }
+
+    rafId = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(rafId);
+  }, [callState]);
+
   const scheduleChunk = useCallback(
     (raw: ArrayBuffer) => {
       const ctx = outputCtxRef.current;
-      if (!ctx || !speakerOn) return;
+      if (!ctx) return;
 
       const f32 = i16ToF32(raw);
       const buf = ctx.createBuffer(1, f32.length, 24000);
@@ -114,12 +147,17 @@ export default function AudioChatUI({ subject, className }: AudioChatUIProps) {
       src.start(startAt);
       nextPlayTimeRef.current = startAt + buf.duration;
 
-      // Switch to panda_speaking on first chunk of a turn
       if (voicePhaseRef.current !== "panda_speaking") {
+        // Cancel any pending silence timer — Panda already responded, so
+        // we must clear the gate or it will block turn 2's silence detection.
+        if (silenceTimerRef.current) {
+          clearTimeout(silenceTimerRef.current);
+          silenceTimerRef.current = null;
+          hasSpeechRef.current = false;
+        }
         setVoicePhase("panda_speaking");
       }
 
-      // Reset the inactivity timer — if chunks stop arriving, turn is done
       if (pandaActivityTimerRef.current) clearTimeout(pandaActivityTimerRef.current);
       pandaActivityTimerRef.current = setTimeout(() => {
         if (voicePhaseRef.current === "panda_speaking") {
@@ -128,10 +166,9 @@ export default function AudioChatUI({ subject, className }: AudioChatUIProps) {
         }
       }, 800);
     },
-    [speakerOn, setVoicePhase]
+    [setVoicePhase]
   );
 
-  // ── Start call ─────────────────────────────────────────────────────────────
   async function startCall() {
     setCallState("connecting");
     setErrorMsg("");
@@ -178,8 +215,11 @@ export default function AudioChatUI({ subject, className }: AudioChatUIProps) {
             setCallState("live");
             setVoicePhase("listening");
           } else if (msg.type === "turn_complete") {
-            // Gemini finished speaking — hand mic back to user
             if (pandaActivityTimerRef.current) clearTimeout(pandaActivityTimerRef.current);
+            if (silenceTimerRef.current) {
+              clearTimeout(silenceTimerRef.current);
+              silenceTimerRef.current = null;
+            }
             setVoicePhase("listening");
             hasSpeechRef.current = false;
           } else if (msg.type === "error") {
@@ -198,11 +238,11 @@ export default function AudioChatUI({ subject, className }: AudioChatUIProps) {
     };
 
     ws.onclose = () => {
-      if (callState === "live") setCallState("idle");
+      // Use functional form — callState in this closure is stale ("connecting")
+      setCallState((prev) => (prev === "live" ? "idle" : prev));
     };
   }
 
-  // ── Audio capture + VAD ───────────────────────────────────────────────────
   function startAudioPipeline(stream: MediaStream) {
     const inputCtx = new AudioContext({ sampleRate: 16000 });
     inputCtxRef.current = inputCtx;
@@ -216,18 +256,15 @@ export default function AudioChatUI({ subject, className }: AudioChatUIProps) {
       if (!ws || ws.readyState !== WebSocket.OPEN) return;
 
       const phase = voicePhaseRef.current;
-
-      // Don't send mic audio while Panda is talking or we're waiting for response
       if (phase === "panda_speaking" || phase === "processing") return;
-      if (mutedRef.current) return;
 
       const f32 = e.inputBuffer.getChannelData(0);
       const rms = computeRMS(f32);
+      currentRMSRef.current = rms;
 
       ws.send(f32ToI16(f32));
 
       if (rms > SPEECH_RMS_THRESHOLD) {
-        // Active speech — mark speaking, cancel any pending silence timer
         hasSpeechRef.current = true;
         if (voicePhaseRef.current !== "user_speaking") {
           setVoicePhase("user_speaking");
@@ -237,13 +274,12 @@ export default function AudioChatUI({ subject, className }: AudioChatUIProps) {
           silenceTimerRef.current = null;
         }
       } else if (hasSpeechRef.current && !silenceTimerRef.current) {
-        // Silence AFTER speech — start countdown to "processing"
         silenceTimerRef.current = setTimeout(() => {
           silenceTimerRef.current = null;
           hasSpeechRef.current = false;
+          currentRMSRef.current = 0;
           if (voicePhaseRef.current === "user_speaking") {
             setVoicePhase("processing");
-            // Stopping audio sends is enough — Gemini's VAD detects the gap
           }
         }, SILENCE_BEFORE_PROCESSING_MS);
       }
@@ -257,7 +293,6 @@ export default function AudioChatUI({ subject, className }: AudioChatUIProps) {
     nextPlayTimeRef.current = outputCtx.currentTime + 0.05;
   }
 
-  // ── End call ───────────────────────────────────────────────────────────────
   function endCall() {
     teardown();
     setCallState("idle");
@@ -265,20 +300,15 @@ export default function AudioChatUI({ subject, className }: AudioChatUIProps) {
     setErrorMsg("");
   }
 
-  function toggleMute() {
-    mutedRef.current = !mutedRef.current;
-    setMuted(mutedRef.current);
-  }
-
-  // ── Pre-call / error screen ────────────────────────────────────────────────
+  // ── Pre-call / error screen ───────────────────────────────────────────────
   if (callState === "idle" || callState === "error") {
     return (
       <div className="h-full flex flex-col items-center justify-center text-center px-8 gap-6">
         <div className="relative">
           <motion.div
-            animate={{ scale: [1, 1.04, 1] }}
+            animate={{ scale: [1, 1.05, 1] }}
             transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
-            className="h-28 w-28 bg-[#C8E6C9] rounded-3xl flex items-center justify-center text-5xl border-2 border-[#43A047]/20"
+            className="h-28 w-28 bg-[#C8E6C9] rounded-3xl flex items-center justify-center text-5xl border-2 border-[#43A047]/20 shadow-lg shadow-[#43A047]/10"
           >
             🐼
           </motion.div>
@@ -288,13 +318,40 @@ export default function AudioChatUI({ subject, className }: AudioChatUIProps) {
         </div>
 
         <div>
-          <h3 className="font-bold text-[#1B1C17] text-2xl mb-2" style={{ fontFamily: "var(--font-fredoka)" }}>
-            Live Voice Chat with Panda
+          <h3
+            className="font-bold text-[#1B1C17] text-2xl mb-2"
+            style={{ fontFamily: "var(--font-fredoka)" }}
+          >
+            Voice Chat with Panda
           </h3>
-          <p className="text-sm text-[#44483D] max-w-xs">
-            Speak your question, pause — Panda will respond. Then speak again. Just like a real conversation about{" "}
+          <p className="text-sm text-[#44483D] max-w-xs leading-relaxed">
+            Just talk — Panda listens, thinks, and replies, like chatting with a friend about{" "}
             <span className="font-bold text-[#43A047]">{subject}</span>!
           </p>
+        </div>
+
+        {/* How it works */}
+        <div className="flex items-center gap-3 text-xs text-[#44483D]">
+          <div className="flex flex-col items-center gap-1.5">
+            <div className="h-9 w-9 bg-[#E3F2FD] rounded-full flex items-center justify-center text-base shadow-sm">
+              🎤
+            </div>
+            <span className="font-semibold">You speak</span>
+          </div>
+          <div className="text-[#C8E6C9] text-xl pb-4">→</div>
+          <div className="flex flex-col items-center gap-1.5">
+            <div className="h-9 w-9 bg-[#FFF8E1] rounded-full flex items-center justify-center text-base shadow-sm">
+              💭
+            </div>
+            <span className="font-semibold">Panda thinks</span>
+          </div>
+          <div className="text-[#C8E6C9] text-xl pb-4">→</div>
+          <div className="flex flex-col items-center gap-1.5">
+            <div className="h-9 w-9 bg-[#C8E6C9] rounded-full flex items-center justify-center text-base shadow-sm">
+              🐼
+            </div>
+            <span className="font-semibold">Panda replies</span>
+          </div>
         </div>
 
         {errorMsg && (
@@ -308,8 +365,8 @@ export default function AudioChatUI({ subject, className }: AudioChatUIProps) {
           className="bg-[#43A047] hover:bg-[#388E3C] text-white font-bold py-3.5 px-8 rounded-2xl flex items-center gap-2 transition-all shadow-md shadow-[#43A047]/20 active:scale-95"
           style={{ fontFamily: "var(--font-fredoka)" }}
         >
-          <Mic className="h-4 w-4" />
-          Start Voice Call
+          <Mic className="h-5 w-5" />
+          Start Voice Chat
         </button>
         <p className="text-xs text-[#75796C]">Microphone access required</p>
       </div>
@@ -325,113 +382,204 @@ export default function AudioChatUI({ subject, className }: AudioChatUIProps) {
           transition={{ duration: 1.2, repeat: Infinity, ease: "linear" }}
           className="h-10 w-10 rounded-full border-4 border-[#C8E6C9] border-t-[#43A047]"
         />
-        <p className="text-sm font-medium text-[#44483D]">Connecting to Panda…</p>
+        <p className="text-sm font-semibold text-[#44483D]">Connecting to Panda…</p>
       </div>
     );
   }
 
-  // ── Live call ──────────────────────────────────────────────────────────────
+  // ── Live chat ──────────────────────────────────────────────────────────────
   const phaseConfig = {
-    listening:      { label: "Your turn — speak now",   sublabel: "Panda is waiting for you",         color: "bg-[#C8E6C9]", border: "border-[#43A047]/30" },
-    user_speaking:  { label: "Listening…",              sublabel: "Keep going, Panda is listening",    color: "bg-[#A5D6A7]", border: "border-[#43A047]" },
-    processing:     { label: "Processing…",             sublabel: "Panda is thinking",                 color: "bg-[#C8E6C9]", border: "border-[#43A047]/30" },
-    panda_speaking: { label: "Panda is speaking…",      sublabel: "Wait for Panda to finish",          color: "bg-[#A5D6A7]", border: "border-[#43A047]" },
+    listening: {
+      pandaLabel: "Listening for you…",
+      pandaSubLabel: "Speak whenever you're ready",
+      turnLabel: "🎤  Your Turn",
+      turnBg: "bg-[#E3F2FD]",
+      turnText: "text-[#1565C0]",
+      turnBorder: "border-[#BBDEFB]",
+      avatarBg: "bg-[#C8E6C9]",
+      avatarBorder: "border-[#43A047]/30",
+    },
+    user_speaking: {
+      pandaLabel: "Go ahead, I'm all ears!",
+      pandaSubLabel: "Keep talking…",
+      turnLabel: "🎤  You're Speaking",
+      turnBg: "bg-[#1E88E5]",
+      turnText: "text-white",
+      turnBorder: "border-transparent",
+      avatarBg: "bg-[#C8E6C9]",
+      avatarBorder: "border-[#43A047]/20",
+    },
+    processing: {
+      pandaLabel: "Thinking of a great answer…",
+      pandaSubLabel: "Just a moment!",
+      turnLabel: "💭  Panda is Thinking",
+      turnBg: "bg-[#FFF8E1]",
+      turnText: "text-[#E65100]",
+      turnBorder: "border-[#FFE082]",
+      avatarBg: "bg-[#FFF9E6]",
+      avatarBorder: "border-[#FFB300]/40",
+    },
+    panda_speaking: {
+      pandaLabel: "Panda is talking…",
+      pandaSubLabel: "Listen up!",
+      turnLabel: "🐼  Panda is Talking",
+      turnBg: "bg-[#43A047]",
+      turnText: "text-white",
+      turnBorder: "border-transparent",
+      avatarBg: "bg-[#A5D6A7]",
+      avatarBorder: "border-[#43A047]",
+    },
   }[voicePhase];
 
   const showPulse = voicePhase === "panda_speaking";
-  const showWave  = voicePhase === "user_speaking" || voicePhase === "panda_speaking";
-  const waveColor = voicePhase === "panda_speaking" ? "bg-[#43A047]" : "bg-[#1B5E20]";
+  const isUserTurn = voicePhase === "listening" || voicePhase === "user_speaking";
 
   return (
-    <div className="h-full flex flex-col items-center justify-between px-6 py-10">
+    <div className="h-full flex flex-col bg-white">
 
-      {/* ── Panda avatar + status ── */}
-      <div className="flex-1 flex flex-col items-center justify-center gap-5">
+      {/* Header */}
+      <div className="flex items-center justify-between px-5 py-3 border-b border-[#43A047]/10">
+        <span
+          className="text-sm font-bold text-[#44483D]"
+          style={{ fontFamily: "var(--font-fredoka)" }}
+        >
+          Voice Chat
+        </span>
+        <span className="bg-[#E8F5E9] text-[#1B5E20] text-xs font-bold px-3 py-1 rounded-full">
+          {subject} · Class {className}
+        </span>
+      </div>
+
+      {/* ── Panda section ── */}
+      <div className="flex-1 flex flex-col items-center justify-center gap-4 px-6">
 
         {/* Avatar */}
         <div className="relative flex items-center justify-center">
           <AnimatePresence>
             {showPulse && (
               <>
-                <motion.div key="r1" initial={{ scale: 1, opacity: 0.3 }} animate={{ scale: 1.7, opacity: 0 }}
-                  transition={{ duration: 1.5, repeat: Infinity }}
-                  className="absolute h-28 w-28 rounded-full bg-[#43A047]" />
-                <motion.div key="r2" initial={{ scale: 1, opacity: 0.25 }} animate={{ scale: 1.4, opacity: 0 }}
-                  transition={{ duration: 1.5, repeat: Infinity, delay: 0.35 }}
-                  className="absolute h-24 w-24 rounded-full bg-[#43A047]" />
+                <motion.div
+                  key="r1"
+                  initial={{ scale: 1, opacity: 0.35 }}
+                  animate={{ scale: 1.85, opacity: 0 }}
+                  transition={{ duration: 1.6, repeat: Infinity, ease: "easeOut" }}
+                  className="absolute h-32 w-32 rounded-full bg-[#43A047]"
+                />
+                <motion.div
+                  key="r2"
+                  initial={{ scale: 1, opacity: 0.25 }}
+                  animate={{ scale: 1.5, opacity: 0 }}
+                  transition={{ duration: 1.6, repeat: Infinity, delay: 0.45, ease: "easeOut" }}
+                  className="absolute h-28 w-28 rounded-full bg-[#43A047]"
+                />
               </>
             )}
           </AnimatePresence>
-          <div className={`h-28 w-28 rounded-full border-4 flex items-center justify-center text-5xl z-10 shadow-md transition-all duration-300 ${phaseConfig.color} ${phaseConfig.border}`}>
+
+          <div
+            className={`h-32 w-32 rounded-full border-4 flex items-center justify-center text-6xl z-10 shadow-lg transition-all duration-500 ${phaseConfig.avatarBg} ${phaseConfig.avatarBorder}`}
+          >
             🐼
           </div>
+
+          {/* Badge: processing spinner or speaking icon */}
+          <AnimatePresence>
+            {voicePhase === "processing" && (
+              <motion.div
+                key="processing-badge"
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                exit={{ scale: 0 }}
+                className="absolute -bottom-1 -right-1 z-20 h-9 w-9 bg-[#FFF8E1] border-2 border-[#FFB300]/40 rounded-full flex items-center justify-center shadow"
+              >
+                <Loader2 className="h-4 w-4 text-[#E65100] animate-spin" />
+              </motion.div>
+            )}
+            {voicePhase === "panda_speaking" && (
+              <motion.div
+                key="speaking-badge"
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                exit={{ scale: 0 }}
+                className="absolute -bottom-1 -right-1 z-20 h-9 w-9 bg-[#43A047] border-2 border-white rounded-full flex items-center justify-center shadow"
+              >
+                <Volume2 className="h-4 w-4 text-white" />
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
-        {/* Status */}
-        <div className="text-center space-y-1">
-          <p className="text-xl font-bold text-[#1B1C17]" style={{ fontFamily: "var(--font-fredoka)" }}>
-            {phaseConfig.label}
+        {/* Panda label */}
+        <div className="text-center">
+          <p
+            className="font-bold text-[#1B1C17] text-xl"
+            style={{ fontFamily: "var(--font-fredoka)" }}
+          >
+            Panda
           </p>
-          <p className="text-sm text-[#44483D]">{phaseConfig.sublabel}</p>
+          <AnimatePresence mode="wait">
+            <motion.p
+              key={voicePhase}
+              initial={{ opacity: 0, y: 4 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -4 }}
+              transition={{ duration: 0.2 }}
+              className="text-sm text-[#44483D] mt-0.5"
+            >
+              {phaseConfig.pandaLabel}
+            </motion.p>
+          </AnimatePresence>
         </div>
+      </div>
 
-        {/* Processing spinner */}
-        <AnimatePresence>
-          {voicePhase === "processing" && (
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-              <Loader2 className="h-6 w-6 text-[#43A047] animate-spin" />
-            </motion.div>
-          )}
+      {/* ── Turn indicator pill ── */}
+      <div className="flex items-center gap-3 px-6 py-3">
+        <div className="flex-1 h-px bg-[#E8F5E9]" />
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={voicePhase}
+            initial={{ scale: 0.88, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.88, opacity: 0 }}
+            transition={{ duration: 0.18 }}
+            className={`px-5 py-2 rounded-full text-sm font-bold border ${phaseConfig.turnBg} ${phaseConfig.turnText} ${phaseConfig.turnBorder}`}
+          >
+            {phaseConfig.turnLabel}
+          </motion.div>
         </AnimatePresence>
+        <div className="flex-1 h-px bg-[#E8F5E9]" />
+      </div>
 
-        {/* Waveform bars */}
-        <AnimatePresence>
-          {showWave && (
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-              className="flex items-center gap-1 h-8">
-              {[0, 0.08, 0.16, 0.06, 0.22, 0.04, 0.14, 0.1, 0.18, 0.07].map((delay, i) => (
-                <motion.div key={i}
-                  animate={{ scaleY: [0.2, 1, 0.2] }}
-                  transition={{ duration: 0.6, repeat: Infinity, delay }}
-                  className={`w-1.5 rounded-full ${waveColor}`}
-                  style={{ height: "100%" }} />
-              ))}
-            </motion.div>
-          )}
-        </AnimatePresence>
+      {/* ── User mic section ── */}
+      <div className="flex flex-col items-center gap-2 px-6 pb-3">
 
-        {/* Turn indicator dots */}
-        <div className="flex gap-2 mt-2">
-          {(["listening", "user_speaking", "processing", "panda_speaking"] as VoicePhase[]).map((p) => (
-            <div key={p} className={`h-2 w-2 rounded-full transition-all duration-300 ${voicePhase === p ? "bg-[#43A047] scale-125" : "bg-[#C8E6C9]"}`} />
+        {/* Live waveform — bars animated via RAF, no re-renders */}
+        <div className="flex items-end gap-1 w-full h-12">
+          {Array.from({ length: WAVE_BARS }).map((_, i) => (
+            <div
+              key={i}
+              ref={(el) => { waveBarRefs.current[i] = el; }}
+              className={`flex-1 rounded-full origin-bottom transition-colors duration-300 ${
+                voicePhase === "user_speaking" ? "bg-[#1E88E5]" : "bg-[#43A047]/40"
+              }`}
+              style={{ height: "100%", transform: "scaleY(0.08)", opacity: 0.4 }}
+            />
           ))}
         </div>
 
-        {/* Subject chip */}
-        <span className="bg-[#C8E6C9] text-[#1B5E20] text-xs font-bold px-4 py-1.5 rounded-full">
-          {subject} · Class {className}
-        </span>
+        <p className="text-[11px] font-bold text-[#75796C] uppercase tracking-widest">
+          {isUserTurn ? "You" : "Waiting for Panda…"}
+        </p>
       </div>
 
       {/* ── Controls ── */}
-      <div className="flex items-center gap-5 shrink-0 mt-4">
-        <button onClick={toggleMute} title={muted ? "Unmute mic" : "Mute mic"}
-          className={`h-14 w-14 rounded-2xl flex items-center justify-center transition-all shadow-sm ${
-            muted ? "bg-red-100 text-red-600 hover:bg-red-200" : "bg-[#C8E6C9] text-[#43A047] hover:bg-[#A5D6A7]"
-          }`}>
-          {muted ? <MicOff className="h-6 w-6" /> : <Mic className="h-6 w-6" />}
-        </button>
-
-        <button onClick={endCall} title="End call"
-          className="h-16 w-16 rounded-2xl bg-red-500 hover:bg-red-600 text-white flex items-center justify-center transition-all shadow-md active:scale-95">
-          <PhoneOff className="h-7 w-7" />
-        </button>
-
-        <button onClick={() => setSpeakerOn((s) => !s)} title={speakerOn ? "Mute speaker" : "Unmute speaker"}
-          className={`h-14 w-14 rounded-2xl flex items-center justify-center transition-all shadow-sm ${
-            speakerOn ? "bg-[#C8E6C9] text-[#43A047] hover:bg-[#A5D6A7]" : "bg-[#F0EDE4] text-[#44483D] hover:bg-[#E8E4D9]"
-          }`}>
-          {speakerOn ? <Volume2 className="h-6 w-6" /> : <VolumeX className="h-6 w-6" />}
+      <div className="flex items-center justify-center px-6 py-4 border-t border-[#43A047]/10">
+        <button
+          onClick={endCall}
+          className="bg-red-500 hover:bg-red-600 active:scale-95 text-white font-bold px-10 py-3 rounded-full transition-all shadow-md"
+          style={{ fontFamily: "var(--font-fredoka)" }}
+        >
+          End Chat
         </button>
       </div>
     </div>
