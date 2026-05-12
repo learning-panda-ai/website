@@ -2,12 +2,24 @@ import type { Metadata } from "next";
 import PolicyLayout from "@/components/PolicyLayout";
 
 import { sections } from "@/data/termsOfService";
+import { getSiteUrl } from "@/lib/seo";
+
+const site = getSiteUrl();
 
 export const metadata: Metadata = {
   title: "Terms of Service — Learning Panda AI",
   description:
     "Read the Terms of Service for Learning Panda AI. By using our platform, you agree to these terms governing your rights and responsibilities.",
   robots: { index: true, follow: true },
+  alternates: { canonical: `${site}/terms-of-service` },
+  openGraph: {
+    type: "website",
+    locale: "en_IN",
+    url: `${site}/terms-of-service`,
+    siteName: "Learning Panda",
+    title: "Terms of Service — Learning Panda",
+    description: "Legal terms for using the Learning Panda educational platform and related services.",
+  },
 };
 
 export default function TermsOfServicePage() {

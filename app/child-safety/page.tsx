@@ -2,12 +2,25 @@ import type { Metadata } from "next";
 import PolicyLayout from "@/components/PolicyLayout";
 
 import { sections } from "@/data/childSafety";
+import { getSiteUrl } from "@/lib/seo";
+
+const site = getSiteUrl();
 
 export const metadata: Metadata = {
   title: "Child Safety Policy — Learning Panda AI",
   description:
     "Learning Panda AI's Child Safety Policy explains how we protect young learners, comply with India's DPDP Act 2023, and create a safe educational environment for students of all ages.",
   robots: { index: true, follow: true },
+  alternates: { canonical: `${site}/child-safety` },
+  openGraph: {
+    type: "website",
+    locale: "en_IN",
+    url: `${site}/child-safety`,
+    siteName: "Learning Panda",
+    title: "Child Safety Policy — Learning Panda",
+    description:
+      "Safeguards for minors using Learning Panda: educational-only AI, moderation, and data practices for families and schools.",
+  },
 };
 
 export default function ChildSafetyPage() {

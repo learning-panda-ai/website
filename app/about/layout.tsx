@@ -1,12 +1,84 @@
 import type { Metadata } from "next";
 
+import { getSiteUrl } from "@/lib/seo";
+
+const site = getSiteUrl();
+
 export const metadata: Metadata = {
-  title: "About Us — Learning Panda AI",
+  title: "About Us",
   description:
-    "Learn about Learning Panda AI — our mission to make quality AI-powered education accessible to every student in India, from Class 1 to university.",
+    "Learning Panda (Learning Panda AI) is an India-first AI study platform for Class 1–12: textbook-grounded tutoring for CBSE, ICSE, and major state boards, with parent reports and school-ready controls. Read our mission, story, and company contacts.",
+  keywords: [
+    "Learning Panda company",
+    "Learning Panda AI about",
+    "CBSE ICSE AI education India",
+    "textbook aligned tutoring startup",
+  ],
+  alternates: {
+    canonical: `${site}/about`,
+  },
+  openGraph: {
+    type: "website",
+    locale: "en_IN",
+    url: `${site}/about`,
+    siteName: "Learning Panda",
+    title: "About Learning Panda — AI tutor grounded in Indian textbooks",
+    description:
+      "Our mission: affordable, syllabus-accurate AI help for every Indian student, with safe, board-aligned answers and tools for parents and schools.",
+    images: [
+      {
+        url: "/opengraph-image",
+        width: 1200,
+        height: 630,
+        alt: "About Learning Panda",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "About Learning Panda",
+    description:
+      "India-first AI study companion: CBSE, ICSE, and state boards, built for students, parents, and schools.",
+    images: ["/opengraph-image"],
+  },
   robots: { index: true, follow: true },
 };
 
+const aboutJsonLd = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "BreadcrumbList",
+      itemListElement: [
+        { "@type": "ListItem", position: 1, name: "Home", item: site },
+        { "@type": "ListItem", position: 2, name: "About", item: `${site}/about` },
+      ],
+    },
+    {
+      "@type": "AboutPage",
+      "@id": `${site}/about#webpage`,
+      url: `${site}/about`,
+      name: "About Learning Panda",
+      description:
+        "Company story and mission for Learning Panda, an educational AI product for Indian K–12 boards.",
+      about: {
+        "@type": "EducationalOrganization",
+        name: "Learning Panda",
+        alternateName: "Learning Panda AI",
+        url: site,
+      },
+    },
+  ],
+};
+
 export default function AboutLayout({ children }: { children: React.ReactNode }) {
-  return <>{children}</>;
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(aboutJsonLd) }}
+      />
+      {children}
+    </>
+  );
 }

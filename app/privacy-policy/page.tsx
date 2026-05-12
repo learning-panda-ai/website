@@ -2,12 +2,24 @@ import type { Metadata } from "next";
 import PolicyLayout from "@/components/PolicyLayout";
 
 import { sections } from "@/data/privacyPolicy";
+import { getSiteUrl } from "@/lib/seo";
+
+const site = getSiteUrl();
 
 export const metadata: Metadata = {
   title: "Privacy Policy — Learning Panda AI",
   description:
     "Learn how Learning Panda AI collects, uses, and protects your personal data. We are committed to your privacy and the safety of every student.",
   robots: { index: true, follow: true },
+  alternates: { canonical: `${site}/privacy-policy` },
+  openGraph: {
+    type: "website",
+    locale: "en_IN",
+    url: `${site}/privacy-policy`,
+    siteName: "Learning Panda",
+    title: "Privacy Policy — Learning Panda",
+    description: "How we handle student and parent data on learningpanda.ai, aligned with Indian DPDP expectations.",
+  },
 };
 
 

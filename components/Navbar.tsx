@@ -25,6 +25,7 @@ export default function Navbar({ user: propsUser }: NavbarProps = {}) {
   const isLoggedIn = !!user;
   const isDashboard = pathname?.startsWith("/dashboard");
   const firstName = user?.name?.split(" ")[0] ?? "User";
+  const isHomePage = pathname === "/";
 
   return (
     <header className="sticky top-0 z-50 bg-white border-b border-gray-100 shadow-sm">
@@ -73,13 +74,13 @@ export default function Navbar({ user: propsUser }: NavbarProps = {}) {
           <>
             <div className="hidden md:flex items-center gap-7">
               {navLinks.map((link) => (
-                <a
+                <Link
                   key={link.label}
-                  href={link.href}
+                  href={isHomePage ? link.href : `/${link.href}`}
                   className="text-sm font-semibold text-gray-600 hover:text-green-600 transition-colors"
                 >
                   {link.label}
-                </a>
+                </Link>
               ))}
             </div>
 

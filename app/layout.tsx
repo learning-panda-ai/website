@@ -3,6 +3,7 @@ import { Nunito, Fredoka, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Providers from "./providers";
 import { GoogleAnalytics } from "@next/third-parties/google";
+import { getSiteUrl } from "@/lib/seo";
 
 const nunito = Nunito({
   variable: "--font-nunito",
@@ -22,10 +23,10 @@ const geistMono = Geist_Mono({
 });
 
 
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
+const siteUrl = getSiteUrl();
 
 export const metadata: Metadata = {
-  metadataBase: new URL(BASE_URL!),
+  metadataBase: new URL(siteUrl),
 
   title: {
     template: "%s | Learning Panda",
@@ -35,26 +36,13 @@ export const metadata: Metadata = {
   description:
     "Learning Panda is an AI-powered study companion that helps K-12 and university students master math, science, history, English, and more. Get instant homework help, step-by-step explanations, and personalized practice — free, 24/7.",
 
-  keywords: [
-    "AI tutor",
-    "AI study buddy",
-    "homework help",
-    "online tutoring",
-    "kids education",
-    "K-12 learning",
-    "personalized learning",
-    "math help",
-    "science help",
-    "adaptive learning",
-    "AI education app",
-    "school homework help",
-    "free online tutor",
-    "study app for students",
-  ],
-
-  authors: [{ name: "Learning Panda", url: BASE_URL }],
+  authors: [{ name: "Learning Panda", url: siteUrl }],
   creator: "Learning Panda",
   publisher: "Learning Panda",
+
+  verification: {
+    google: "cPLnYePszcQV3XSX7P_ANBl2ciJsPhHKwFBuu0ABlrE",
+  },
 
   formatDetection: {
     email: false,
@@ -64,8 +52,8 @@ export const metadata: Metadata = {
 
   openGraph: {
     type: "website",
-    locale: "en_US",
-    url: BASE_URL,
+    locale: "en_IN",
+    url: siteUrl,
     siteName: "Learning Panda",
     title: "Learning Panda — AI Study Buddy for Every Subject & Grade",
     description:
@@ -86,8 +74,8 @@ export const metadata: Metadata = {
     description:
       "Your AI-powered study companion. Instant homework help with any subject, any grade, 24/7. Free forever — no credit card required.",
     images: ["/opengraph-image"],
-    creator: "@learningpanda",
-    site: "@learningpanda",
+    creator: "@LearningPandaAI",
+    site: "@LearningPandaAI",
   },
 
   robots: {
@@ -110,10 +98,6 @@ export const metadata: Metadata = {
 
   manifest: "/site.webmanifest",
 
-  alternates: {
-    canonical: BASE_URL,
-  },
-
   category: "education",
 };
 
@@ -124,11 +108,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <GoogleAnalytics gaId="G-KEEZ203GH9" />
-      <meta name="google-site-verification" content="cPLnYePszcQV3XSX7P_ANBl2ciJsPhHKwFBuu0ABlrE" />
       <body
         className={`${nunito.variable} ${fredoka.variable} ${geistMono.variable} antialiased`}
       >
+        <GoogleAnalytics gaId="G-KEEZ203GH9" />
         <Providers>{children}</Providers>
       </body>
     </html>

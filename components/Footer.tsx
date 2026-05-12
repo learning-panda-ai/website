@@ -1,14 +1,16 @@
+import Link from "next/link";
+
 const footerLinks = {
   Product: [
-    { label: "Features", href: "#features" },
-    { label: "For Schools", href: "#for-schools" },
-    { label: "Pricing", href: "#pricing" },
-    { label: "How It Works", href: "#how-it-works" },
+    { label: "Features", href: "/#features" },
+    { label: "For Schools", href: "/#for-schools" },
+    { label: "Pricing", href: "/#pricing" },
+    { label: "How It Works", href: "/#how-it-works" },
   ],
   Resources: [
-    { label: "Blog", href: "#" },
-    { label: "Help Center", href: "#" },
-    { label: "Study Guides", href: "#" },
+    { label: "Frequently Asked Questions", href: "/#faq" },
+    { label: "About Learning Panda", href: "/about" },
+    { label: "AI Usage & Crawling", href: "/llms.txt" },
   ],
   Company: [
     { label: "About Us", href: "/about" },
@@ -21,6 +23,14 @@ const footerLinks = {
     { label: "Child Safety Policy", href: "/child-safety" },
   ],
 };
+
+const socialLinks = [
+  { icon: "𝕏", label: "Twitter/X", href: "https://x.com/LearningPandaAI" },
+  { icon: "in", label: "LinkedIn", href: "https://www.linkedin.com/company/learning-panda-ai/" },
+  { icon: "◈", label: "Instagram", href: "https://www.instagram.com/learning_panda_ai/" },
+  { icon: "▶", label: "YouTube", href: "https://www.youtube.com/@learning-panda-ai" },
+  { icon: "r/", label: "Reddit", href: "https://www.reddit.com/user/learning-panda-ai/" },
+];
 
 export default function Footer() {
   return (
@@ -42,15 +52,12 @@ export default function Footer() {
               AI-powered learning, grounded in your board&apos;s textbooks.
             </p>
             <div className="flex gap-3">
-              {[
-                { icon: "𝕏", label: "Twitter/X" },
-                { icon: "in", label: "LinkedIn" },
-                { icon: "▶", label: "YouTube" },
-                { icon: "◈", label: "Instagram" },
-              ].map(({ icon, label }) => (
+              {socialLinks.map(({ icon, label, href }) => (
                 <a
                   key={label}
-                  href="#"
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   aria-label={`Follow us on ${label}`}
                   className="h-8 w-8 rounded-lg bg-gray-800 flex items-center justify-center text-xs cursor-pointer hover:bg-green-600 transition-colors"
                 >
@@ -67,9 +74,15 @@ export default function Footer() {
               <ul className="space-y-2.5">
                 {links.map((link) => (
                   <li key={link.label}>
-                    <a href={link.href} className="text-sm hover:text-green-400 transition-colors">
-                      {link.label}
-                    </a>
+                    {link.href.startsWith("mailto:") ? (
+                      <a href={link.href} className="text-sm hover:text-green-400 transition-colors">
+                        {link.label}
+                      </a>
+                    ) : (
+                      <Link href={link.href} className="text-sm hover:text-green-400 transition-colors">
+                        {link.label}
+                      </Link>
+                    )}
                   </li>
                 ))}
               </ul>

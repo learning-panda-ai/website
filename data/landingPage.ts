@@ -257,4 +257,8 @@ export const faqItems = [
     q: "Is it safe for children?",
     a: "Absolutely. All content is strictly educational and sourced from official board textbooks. Our content moderation system prevents off-topic, inappropriate, or unsafe conversations. Panda only engages in academic discussions, and parents have full visibility into their child's activity.",
   },
+  {
+    q: "How is Learning Panda different from generic doubt-solving apps?",
+    a: "Most generic doubt apps give broad internet answers. Learning Panda is built for Indian school outcomes: board-specific textbook grounding (CBSE, ICSE, and state boards), chapter-level revision workflows, adaptive quiz loops, and optional parent reports. That means your child studies what is actually taught and tested in school.",
+  },
 ];

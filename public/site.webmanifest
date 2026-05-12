@@ -1,7 +1,7 @@
 {
   "name": "Learning Panda",
   "short_name": "Learning Panda",
-  "description": "AI-powered study buddy for every subject and grade. Free, 24/7 homework help and personalized learning.",
+  "description": "India-first AI study companion for Class 1–12: CBSE, ICSE, and state board textbook–aligned help with text, voice, video, quizzes, and parent-friendly progress insights.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",

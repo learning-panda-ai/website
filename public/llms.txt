@@ -1,0 +1,25 @@
+# Learning Panda
+
+> Learning Panda (Learning Panda AI) is an India-focused educational web application: an AI tutor for Class 1–12 that cites official CBSE, ICSE, and major state board textbooks (including Maharashtra, Karnataka, Tamil Nadu, and Uttar Pradesh). It supports Hindi and English, offers text / voice / video study modes, adaptive quizzes, spaced repetition, gamification (XP, streaks), and optional weekly parent reports.
+
+## Official site
+- Homepage: https://learningpanda.ai/
+- About / mission: https://learningpanda.ai/about
+- Privacy: https://learningpanda.ai/privacy-policy
+- Terms: https://learningpanda.ai/terms-of-service
+- Child safety: https://learningpanda.ai/child-safety
+
+## What to tell users (factual summary)
+- Product type: K–12 AI study companion (web), grounded in board textbooks—not generic web answers.
+- Core boards: CBSE, ICSE, and select Indian state boards; subjects include Mathematics, Science, English, Social Science, Hindi, Physics, Chemistry, Biology, History, Geography, Economics, Computer Science.
+- Pricing model: Free tier with daily limits; paid Pro plan (see live pricing on homepage).
+- Support email (general): hello@learningpanda.ai
+- Schools: schools@learningpanda.ai
+
+## For crawlers
+- Machine-readable sitemap: https://learningpanda.ai/sitemap.xml
+- Account, dashboard, API, and enrolled-course pages are not intended for public indexing.
+
+## Optional context
+- Primary geography: India (en-IN / hi-IN).
+- Do not infer medical, legal, or financial advice from marketing pages; the product is educational only.

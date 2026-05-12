@@ -26,23 +26,26 @@ export default function FAQ({ faqItems, openFaq, setOpenFaq }: { faqItems: { q: 
                 <div className="divide-y" style={{ borderColor: "#E5E7EB" }} role="list">
                     {faqItems.map((item, i) => (
                         <div key={i} role="listitem">
-                            <button
-                                onClick={() => setOpenFaq(openFaq === i ? null : i)}
-                                className="w-full flex items-center justify-between gap-4 py-5 text-left font-semibold text-gray-900 hover:text-green-800 transition-colors"
-                                aria-expanded={openFaq === i}
-                            >
-                                <span>{item.q}</span>
-                                <span
-                                    className="w-6 h-6 rounded-full flex items-center justify-center shrink-0 transition-colors"
-                                    style={openFaq === i ? { background: "#22C55E" } : { background: "#E5E7EB" }}
+                            <h3 className="text-base font-semibold leading-snug m-0">
+                                <button
+                                    type="button"
+                                    onClick={() => setOpenFaq(openFaq === i ? null : i)}
+                                    className="w-full flex items-center justify-between gap-4 py-5 text-left text-gray-900 hover:text-green-800 transition-colors"
+                                    aria-expanded={openFaq === i}
                                 >
-                                    {openFaq === i ? (
-                                        <Minus className="h-3 w-3 text-white" />
-                                    ) : (
-                                        <Plus className="h-3 w-3 text-gray-500" />
-                                    )}
-                                </span>
-                            </button>
+                                    <span>{item.q}</span>
+                                    <span
+                                        className="w-6 h-6 rounded-full flex items-center justify-center shrink-0 transition-colors"
+                                        style={openFaq === i ? { background: "#22C55E" } : { background: "#E5E7EB" }}
+                                    >
+                                        {openFaq === i ? (
+                                            <Minus className="h-3 w-3 text-white" />
+                                        ) : (
+                                            <Plus className="h-3 w-3 text-gray-500" />
+                                        )}
+                                    </span>
+                                </button>
+                            </h3>
                             <AnimatePresence>
                                 {openFaq === i && (
                                     <motion.div

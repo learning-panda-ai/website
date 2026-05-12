@@ -1,20 +1,37 @@
 import { MetadataRoute } from "next";
 
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL as string;
+import { getSiteUrl } from "@/lib/seo";
 
 export default function sitemap(): MetadataRoute.Sitemap {
+  const base = getSiteUrl();
+  const now = new Date();
+
   return [
+    { url: `${base}/`, lastModified: now, changeFrequency: "daily", priority: 1 },
+    { url: `${base}/about`, lastModified: now, changeFrequency: "monthly", priority: 0.85 },
     {
-      url: BASE_URL,
-      lastModified: new Date(),
-      changeFrequency: "weekly",
-      priority: 1.0,
+      url: `${base}/privacy-policy`,
+      lastModified: now,
+      changeFrequency: "yearly",
+      priority: 0.5,
     },
     {
-      url: `${BASE_URL}/login`,
-      lastModified: new Date(),
-      changeFrequency: "monthly",
+      url: `${base}/terms-of-service`,
+      lastModified: now,
+      changeFrequency: "yearly",
       priority: 0.5,
+    },
+    {
+      url: `${base}/child-safety`,
+      lastModified: now,
+      changeFrequency: "yearly",
+      priority: 0.55,
+    },
+    {
+      url: `${base}/llms.txt`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.4,
     },
   ];
 }

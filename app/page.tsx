@@ -1,56 +1,100 @@
-"use client";
-import { useState } from "react";
+import type { Metadata } from "next";
 
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
-import LandingPageHero from "@/components/landingPage/landingPageHero";
-import ProblemAndSolution from "@/components/landingPage/ProblemAndSolution";
-import HowItWorks from "@/components/landingPage/howItWorks";
-import Features from "@/components/landingPage/features";
-import SubjectAndBoards from "@/components/landingPage/subjectsAndBoards";
-import InterationModes from "@/components/landingPage/interactionModes";
-import Gamefication from "@/components/landingPage/gamification";
-import ForSchools from "@/components/landingPage/forSchools";
-import Testimonials from "@/components/landingPage/testimonials";
-import Pricing from "@/components/landingPage/pricing";
-import FAQ from "@/components/landingPage/faq";
-import CTA from "@/components/landingPage/cta";
+import { getSiteUrl } from "@/lib/seo";
+import {
+  websiteSchema,
+  organizationSchema,
+  softwareApplicationSchema,
+  faqSchema,
+  homeWebPageSchema,
+} from "@/schemas/landingPage";
+import { HomePageClient } from "./HomePageClient";
 
-import { useAuth } from "@/app/providers";
-import { problems, steps, studentFeatures, parentFeatures, boards, subjects, modes, faqItems, leaderboard, schoolProps, stats, testimonials } from "@/data/landingPage";
-import { websiteSchema, organizationSchema, softwareApplicationSchema, faqSchema } from "@/schemas/landingPage";
+const site = getSiteUrl();
 
-// ── Page Component ─────────────────────────────────────────────────────────
-export default function LandingPage() {
-  const { user } = useAuth();
-  const isLoggedIn = !!user;
+export const metadata: Metadata = {
+  title: "Learning Panda — AI tutor for CBSE, ICSE & State boards (Class 1–12)",
+  description:
+    "Learning Panda is an AI study companion grounded in Indian school textbooks: CBSE, ICSE, Maharashtra, Karnataka, Tamil Nadu, and UP boards. Students get chapter-accurate explanations in text, voice, or video; adaptive quizzes; spaced repetition; and parent-friendly progress reports. Free tier available.",
+  keywords: [
+    // AI-native category (uncontested by Byju's / Vedantu / PW)
+    "AI tutor India",
+    "AI homework help app India",
+    "NCERT AI tutor",
+    "24/7 doubt solving app India",
+    "AI study app India",
+    "voice AI tutor India",
+    // Board + class intent (high conversion)
+    "CBSE AI tutor",
+    "ICSE homework help app",
+    "Class 10 CBSE AI tutor",
+    "Class 12 board exam preparation app",
+    "CBSE Class 10 maths help",
+    "ICSE Class 9 science help",
+    // State board long-tail (underserved by competitors)
+    "Maharashtra board study app",
+    "Karnataka board AI tutor",
+    "UP board study app",
+    "Tamil Nadu board study app",
+    // Competitor displacement
+    "affordable AI tutor India",
+    "Byju's alternative India",
+    "Vedantu alternative India",
+    "PhysicsWallah alternative for school students",
+    // Parent / school intent
+    "parent progress report education app",
+    "safe AI tutor for kids India",
+  ],
+  alternates: {
+    canonical: `${site}/`,
+  },
+  openGraph: {
+    type: "website",
+    locale: "en_IN",
+    url: `${site}/`,
+    siteName: "Learning Panda",
+    title: "Learning Panda — AI tutor aligned to CBSE, ICSE & State textbooks",
+    description:
+      "Chapter-accurate AI help for Indian K–12 students: text, voice, and video modes, adaptive quizzes, and gamified revision. Built for CBSE, ICSE, and major state boards.",
+    images: [
+      {
+        url: "/opengraph-image",
+        width: 1200,
+        height: 630,
+        alt: "Learning Panda — AI study companion for Indian school boards",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Learning Panda — AI tutor for CBSE, ICSE & State boards",
+    description:
+      "Textbook-grounded AI for Class 1–12: instant doubts, voice and video, quizzes, and streaks. Free to start.",
+    images: ["/opengraph-image"],
+    creator: "@LearningPandaAI",
+    site: "@LearningPandaAI",
+  },
+};
 
-  const [activeTab, setActiveTab] = useState<"students" | "parents">("students");
-  const [openFaq, setOpenFaq] = useState<number | null>(null);
-  const [isAnnual, setIsAnnual] = useState(false);
+const structuredData = [
+  websiteSchema,
+  organizationSchema,
+  softwareApplicationSchema,
+  faqSchema,
+  homeWebPageSchema,
+] as const;
 
+export default function HomePage() {
   return (
-    <div className="min-h-screen" style={{ background: "#FAFAF7", fontFamily: "var(--font-nunito)" }}>
-      {/* Structured Data */}
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareApplicationSchema) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
-
-      <Navbar />
-      <LandingPageHero />
-      <ProblemAndSolution problems={problems} />
-      <HowItWorks steps={steps} />
-      <Features activeTab={activeTab} setActiveTab={setActiveTab} studentFeatures={studentFeatures} parentFeatures={parentFeatures} />
-      <SubjectAndBoards subjects={subjects} boards={boards} />
-      <InterationModes modes={modes} />
-      <Gamefication leaderboard={leaderboard} />
-      <ForSchools schoolProps={schoolProps} />
-      <Testimonials testimonials={testimonials} stats={stats} />
-      <Pricing isAnnual={isAnnual} setIsAnnual={setIsAnnual} />
-      <FAQ faqItems={faqItems} openFaq={openFaq} setOpenFaq={setOpenFaq} />
-      <CTA isLoggedIn={isLoggedIn} />
-      <Footer />
-    </div>
+    <>
+      {structuredData.map((schema) => (
+        <script
+          key={schema["@type"]}
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+        />
+      ))}
+      <HomePageClient />
+    </>
   );
 }

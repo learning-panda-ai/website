@@ -57,10 +57,22 @@ function LeftHighlight() {
                 initial="hidden"
                 animate="visible"
                 transition={td(0.2)}
-                className="text-lg text-gray-500 leading-relaxed mb-8 max-w-125"
+                className="seo-primary-summary text-lg text-gray-500 leading-relaxed mb-3 max-w-125"
             >
                 Learning Panda AI studies CBSE, ICSE, and State board textbooks so your child gets
                 answers from the exact content their school teaches — not generic internet results.
+            </motion.p>
+
+            <motion.p
+                variants={fadeUp}
+                initial="hidden"
+                animate="visible"
+                transition={td(0.25)}
+                className="seo-entity-definition text-sm text-gray-500 leading-relaxed mb-8 max-w-125"
+            >
+                Learning Panda (also referred to as Learning Panda AI) is an India-focused educational web
+                application: an AI tutor for Class 1–12 that cites official board textbooks, supports Hindi and
+                English, and includes adaptive quizzes, spaced repetition, and optional parent weekly reports.
             </motion.p>
 
             <motion.div
