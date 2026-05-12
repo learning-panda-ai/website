@@ -5,14 +5,16 @@ import { getSiteUrl } from "@/lib/seo";
 const site = getSiteUrl();
 
 export const metadata: Metadata = {
-  title: "About Us",
+  title: "About Learning Panda — India's AI Tutor for CBSE, ICSE & State Boards",
   description:
-    "Learning Panda (Learning Panda AI) is an India-first AI study platform for Class 1–12: textbook-grounded tutoring for CBSE, ICSE, and major state boards, with parent reports and school-ready controls. Read our mission, story, and company contacts.",
+    "Learn how Learning Panda is making affordable, textbook-grounded AI tutoring available to every Indian school student (Class 1–12) across CBSE, ICSE, and all state boards. Read our mission, story, and company contacts.",
   keywords: [
-    "Learning Panda company",
-    "Learning Panda AI about",
+    "Learning Panda AI company",
+    "about Learning Panda",
     "CBSE ICSE AI education India",
-    "textbook aligned tutoring startup",
+    "textbook aligned AI tutoring startup India",
+    "affordable AI tutor India mission",
+    "Indian edtech AI startup 2025",
   ],
   alternates: {
     canonical: `${site}/about`,

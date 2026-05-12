@@ -15,9 +15,9 @@ const site = getSiteUrl();
 export const metadata: Metadata = {
   title: "Learning Panda — AI tutor for CBSE, ICSE & State boards (Class 1–12)",
   description:
-    "Learning Panda is an AI study companion grounded in Indian school textbooks: CBSE, ICSE, Maharashtra, Karnataka, Tamil Nadu, and UP boards. Students get chapter-accurate explanations in text, voice, or video; adaptive quizzes; spaced repetition; and parent-friendly progress reports. Free tier available.",
+    "Learning Panda is an AI study companion grounded in Indian school textbooks: CBSE, ICSE, and all state boards across India. Students get chapter-accurate explanations in text, voice, or video; adaptive quizzes; spaced repetition; and parent-friendly progress reports. Free tier available.",
   keywords: [
-    // AI-native category (uncontested by Byju's / Vedantu / PW)
+    // AI-native category
     "AI tutor India",
     "AI homework help app India",
     "NCERT AI tutor",
@@ -31,16 +31,15 @@ export const metadata: Metadata = {
     "Class 12 board exam preparation app",
     "CBSE Class 10 maths help",
     "ICSE Class 9 science help",
-    // State board long-tail (underserved by competitors)
+    // State board long-tail
     "Maharashtra board study app",
     "Karnataka board AI tutor",
     "UP board study app",
     "Tamil Nadu board study app",
-    // Competitor displacement
+    // Positioning
     "affordable AI tutor India",
-    "Byju's alternative India",
-    "Vedantu alternative India",
-    "PhysicsWallah alternative for school students",
+    "best AI tutor app India",
+    "online tutor alternative India",
     // Parent / school intent
     "parent progress report education app",
     "safe AI tutor for kids India",

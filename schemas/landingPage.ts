@@ -31,7 +31,7 @@ export const organizationSchema = {
   logo: `${BASE_URL}/opengraph-image`,
   image: `${BASE_URL}/opengraph-image`,
   description:
-    "Learning Panda provides curriculum-aligned AI tutoring for Indian school students (Class 1–12) across CBSE, ICSE, Maharashtra, Karnataka, Tamil Nadu, and Uttar Pradesh state boards.",
+    "Learning Panda provides curriculum-aligned AI tutoring for Indian school students (Class 1–12) across CBSE, ICSE, and all Indian state boards.",
   foundingDate: "2025",
   areaServed: {
     "@type": "Country",
@@ -47,10 +47,7 @@ export const organizationSchema = {
     "AI tutoring",
     "Homework help",
     "Doubt solving",
-    "Maharashtra board",
-    "Karnataka board",
-    "Tamil Nadu board",
-    "UP board",
+    "All Indian state boards",
     "Class 1 to Class 12 education",
   ],
   contactPoint: [

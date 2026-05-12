@@ -107,7 +107,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en-IN">
       <body
         className={`${nunito.variable} ${fredoka.variable} ${geistMono.variable} antialiased`}
       >

@@ -19,7 +19,7 @@ function td(delay = 0) {
 // ── Data ───────────────────────────────────────────────────────────────────
 const stats = [
   { number: "250M+", label: "School students in India" },
-  { number: "6", label: "Boards supported" },
+  { number: "30+", label: "Boards supported" },
   { number: "12", label: "Classes covered (1–12)" },
   { number: "₹299", label: "Pro plan per month" },
 ];
@@ -33,7 +33,7 @@ const differentiators = [
   {
     icon: "🇮🇳",
     title: "Built for India",
-    desc: "Supports CBSE, ICSE, Maharashtra, Karnataka, Tamil Nadu, UP boards and more.",
+    desc: "Supports CBSE, ICSE, and all Indian state boards — every student, every state.",
   },
   {
     icon: "🎮",

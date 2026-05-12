@@ -82,7 +82,7 @@ export default function OgImage() {
 
         {/* Feature pills */}
         <div style={{ display: "flex", gap: 16, flexWrap: "wrap", justifyContent: "center" }}>
-          {["Free Forever", "All Subjects", "24/7 Available", "K-12 + University"].map((pill) => (
+          {["CBSE · ICSE · State Boards", "Class 1–12", "24/7 AI Tutor", "Free to Start"].map((pill) => (
             <div
               key={pill}
               style={{

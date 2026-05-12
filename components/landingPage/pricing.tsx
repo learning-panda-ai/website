@@ -165,7 +165,7 @@ export default function Pricing({ isAnnual, setIsAnnual }: { isAnnual: boolean, 
                                 "Smart study planner",
                                 "Weekly parent reports",
                                 "Leaderboards & quiz battles",
-                                "All 6 boards + all subjects",
+                                "All state boards + all subjects",
                             ].map((label) => (
                                 <li key={label} className="flex items-start gap-2.5 text-sm text-gray-600">
                                     <span

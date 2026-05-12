@@ -144,10 +144,34 @@ export const subjects = [
 export const boards = [
   "CBSE",
   "ICSE",
-  "Maharashtra Board",
-  "Karnataka Board",
-  "Tamil Nadu Board",
+  "Andhra Pradesh",
+  "Assam",
+  "Bihar",
+  "Chhattisgarh",
+  "Goa",
+  "Gujarat",
+  "Haryana",
+  "Himachal Pradesh",
+  "J&K",
+  "Jharkhand",
+  "Karnataka",
+  "Kerala",
+  "Madhya Pradesh",
+  "Maharashtra",
+  "Manipur",
+  "Meghalaya",
+  "Mizoram",
+  "Nagaland",
+  "Odisha",
+  "Punjab",
+  "Rajasthan",
+  "Sikkim",
+  "Tamil Nadu",
+  "Telangana",
+  "Tripura",
   "UP Board",
+  "Uttarakhand",
+  "West Bengal",
 ];
 
 export const modes = [
@@ -200,7 +224,7 @@ export const schoolProps = [
 
 export const stats = [
   { number: "10,000+", label: "Questions answered" },
-  { number: "6", label: "Boards supported" },
+  { number: "30+", label: "Boards supported" },
   { number: "12", label: "Classes covered (1–12)" },
   { number: "2", label: "Languages — Hindi & English" },
 ];
@@ -260,5 +284,21 @@ export const faqItems = [
   {
     q: "How is Learning Panda different from generic doubt-solving apps?",
     a: "Most generic doubt apps give broad internet answers. Learning Panda is built for Indian school outcomes: board-specific textbook grounding (CBSE, ICSE, and state boards), chapter-level revision workflows, adaptive quiz loops, and optional parent reports. That means your child studies what is actually taught and tested in school.",
+  },
+  {
+    q: "How is Learning Panda different from live-tutor or video-lecture platforms?",
+    a: "Most online learning platforms are built around pre-recorded videos or scheduled live sessions with a tutor. Learning Panda is AI-native: there are no session bookings, no waiting, and no passive watching. Your child gets instant, two-way doubt solving at any time of day — via text, voice, or video — with every answer grounded in their exact board textbook. At ₹299/month, it costs a fraction of live tutoring.",
+  },
+  {
+    q: "How is Learning Panda different from apps that only cover Class 11–12 or competitive exams?",
+    a: "Many popular apps focus mainly on Class 11–12 JEE and NEET preparation through video lectures. Learning Panda covers the full school journey: Class 1 through Class 12, across all major subjects and all Indian state boards — CBSE, ICSE, and every state board. Instead of passive video, it offers active AI tutoring — two-way conversation, adaptive quizzes, and spaced repetition — so students retain what they study.",
+  },
+  {
+    q: "What is the best AI tutor app for Indian school students?",
+    a: "Learning Panda is designed specifically for Indian K–12 students: every answer is grounded in official CBSE, ICSE, and state board textbooks, interaction is available via text, voice, and video, and adaptive quizzes with spaced repetition keep students engaged and retaining knowledge. It is available 24/7, requires no scheduling, and starts free — with a Pro plan at ₹299/month.",
+  },
+  {
+    q: "Which Indian school boards does Learning Panda support?",
+    a: "Learning Panda supports CBSE, ICSE, and all Indian state boards — including Maharashtra, Karnataka, Tamil Nadu, UP, Gujarat, Rajasthan, West Bengal, Bihar, Andhra Pradesh, Telangana, Kerala, Punjab, Haryana, Madhya Pradesh, and more. Content is sourced from the official textbooks prescribed by each board, chapter by chapter.",
   },
 ];

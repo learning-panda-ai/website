@@ -44,12 +44,6 @@ export default function SubjectAndBoards({ subjects, boards }: { subjects: any[]
                             {b}
                         </span>
                     ))}
-                    <span
-                        className="px-5 py-2 rounded-full text-sm font-semibold border"
-                        style={{ borderColor: "#E5E7EB", color: "#9CA3AF" }}
-                    >
-                        + More coming Q3 2025
-                    </span>
                 </div>
 
                 {/* Subjects grid */}
