@@ -75,7 +75,7 @@ export async function middleware(request: NextRequest) {
       httpOnly: true,
       secure: isProd,
       sameSite: "lax",
-      maxAge: 15 * 60,
+      maxAge: 24 * 60 * 60,
       path: "/",
     });
     response.cookies.set("lp_refresh_token", data.refresh_token, {

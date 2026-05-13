@@ -46,7 +46,7 @@ export async function POST(req: NextRequest) {
       httpOnly: true,
       secure: isProd,
       sameSite: "lax",
-      maxAge: 15 * 60,
+      maxAge: 24 * 60 * 60,
       path: "/",
     });
     // Scope refresh token to the refresh proxy only — prevents it from being
